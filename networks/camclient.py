@@ -1,25 +1,27 @@
 #client code -> controller
-import cv2 as cv
+
+from picamera2.encoders import H264Encoder, Quality
 import socket
 import numpy
 import pickle
 import threading as thread
+from picamera2 import Picamera2
+from libcamera import controls
+
+cam = Picamera2()
+encoder = H264Encoder()
+output = 'out.h264'
+cam.start_recording(encoder, output, quality=Quality.MEDIUM)
+
+
 
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 10000000)
 serverip = "127.0.0.1"
 serverport = 6969
 
-cap = cv.VideoCapture(0)
-
 while True:
-    ret, photo = cap.read()
-    cv.imshow('clientside', photo)
-    ret, buffer = cv.imencode(".jpg", photo, [int(cv.IMWRITE_JPEG_QUALITY),30])
-    x_as_bytes = pickle.dumps(buffer)
+    print(output)
+    x_as_bytes = pickle.dumps(output)
     s.sendto(x_as_bytes,(serverip , serverport))
-    if cv.waitKey(10) == 13:
-        break
 
-cv.destroyAllWindwos()
-cap.release()
