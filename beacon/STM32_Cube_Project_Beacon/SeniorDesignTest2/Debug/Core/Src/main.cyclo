@@ -1,0 +1,9 @@
+../Core/Src/main.c:88:5:main	2
+../Core/Src/main.c:149:6:SystemClock_Config	4
+../Core/Src/main.c:189:6:lsm6dsox_read_data_polling	6
+../Core/Src/main.c:295:16:platform_write	1
+../Core/Src/main.c:314:16:platform_read	1
+../Core/Src/main.c:330:13:tx_com	1
+../Core/Src/main.c:341:13:platform_delay	1
+../Core/Src/main.c:349:13:platform_init	1
+../Core/Src/main.c:359:6:Error_Handler	1
