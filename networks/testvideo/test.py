@@ -4,6 +4,10 @@ import os
 import vlc
 from time import sleep
 import threading as thread
+from picamera2.outputs import FileOutput
+import io
+import cv2
+
 try:
     import pickle
     from picamera2.encoders import H264Encoder, Quality 
@@ -13,8 +17,17 @@ finally:
     pass
 HOST = '127.0.0.1'
 PORT = 2929
-BUFFERSIZE = 4096
+BUFFERSIZE = 100000
 
+def clientnotvlc():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.bind((HOST, PORT))
+    while 1:
+        x = s.recvfrom(BUFFERSIZE)
+        data = x[0]
+        data = pickle.loads(data)
+        data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+        cv2.imshow("yomama", data)
 
 def client():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -32,20 +45,16 @@ def client():
 
 def cameraserver():
     cam = Picamera2()
-    encoder = H264Encoder()
-    output = 'out.h264'
-    #output = b""
-    cam.start_recording(encoder=encoder, output=output, quality=Quality.LOW)
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    
-    data = 0
-    size = 0
-    file = open('out.h264', "rb")
-    while 1:
-        data = file.read(BUFFERSIZE)    
-        s.sendto(data, ((HOST, PORT)))
-        sleep(0.05)
-    
+    cam.start(show_preview=True)
+    img_counter = 0
+    while True:
+        im = cam.capture_array()
+        ret, buffer = cv2.imencode(".jpg", im, [int(cv2.IMWRITE_JPEG_QUALITY),30])
+        x = pickle.dumps(buffer)
+        s.sendto(x, (HOST, PORT))
+
+
 def server():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     #    s.bind((HOST, PORT))
@@ -63,7 +72,7 @@ def server():
 
 if __name__ == "__main__":
     t2 = thread.Thread(target=cameraserver)
-    t1 = thread.Thread(target=client)
+    t1 = thread.Thread(target=clientnotvlc)
     t1.start()
     time.sleep(0.5)
     t2.start()
