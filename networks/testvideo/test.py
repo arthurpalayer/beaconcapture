@@ -3,7 +3,12 @@ import time
 import os
 import vlc
 import threading as thread
-
+try:
+    import pickle
+    from picamera2 import picamera2
+    from libcamera import controls 
+finally:
+    pass
 HOST = '127.0.0.1'
 PORT = 2929
 BUFFERSIZE = 1024
@@ -22,6 +27,18 @@ def client():
         data, addr = s.recvfrom(BUFFERSIZE)
         play.nextframe()
 
+
+def cameraserver():
+    cam = picamera2
+    encoder = H264Encoder()
+    output = 'out.h264'
+    cam.start_recording(encoder, output, quality=Quality.LOW)
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    data = 0
+    size = 0
+    while 1:
+        s.sendto(output, ((HOST, PORT)))
+    
 def server():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     #    s.bind((HOST, PORT))
