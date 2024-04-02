@@ -2,10 +2,12 @@ import socket
 import time
 import os
 import vlc
+from time import sleep
 import threading as thread
 try:
     import pickle
-    from picamera2 import picamera2
+    from picamera2.encoders import H264Encoder, Quality 
+    from picamera2 import Picamera2
     from libcamera import controls 
 finally:
     pass
@@ -25,19 +27,24 @@ def client():
     play.play()
     while 1:
         data, addr = s.recvfrom(BUFFERSIZE)
-        play.nextframe()
+        play.next_frame()
 
 
 def cameraserver():
-    cam = picamera2
+    cam = Picamera2()
     encoder = H264Encoder()
     output = 'out.h264'
-    cam.start_recording(encoder, output, quality=Quality.LOW)
+    #output = b""
+    cam.start_recording(encoder=encoder, output=output, quality=Quality.LOW)
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    
     data = 0
     size = 0
+    file = open("out.h264", "rb")
     while 1:
-        s.sendto(output, ((HOST, PORT)))
+        data = file.read(BUFFERSIZE)    
+        s.sendto(data, ((HOST, PORT)))
+        sleep(0.2)
     
 def server():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -55,7 +62,7 @@ def server():
 
 
 if __name__ == "__main__":
-    t2 = thread.Thread(target=server)
+    t2 = thread.Thread(target=cameraserver)
     t1 = thread.Thread(target=client)
     t1.start()
     time.sleep(0.5)
