@@ -13,7 +13,7 @@ finally:
     pass
 HOST = '127.0.0.1'
 PORT = 2929
-BUFFERSIZE = 1024
+BUFFERSIZE = 4096
 
 
 def client():
@@ -40,11 +40,11 @@ def cameraserver():
     
     data = 0
     size = 0
-    file = open("out.h264", "rb")
+    file = open('out.h264', "rb")
     while 1:
         data = file.read(BUFFERSIZE)    
         s.sendto(data, ((HOST, PORT)))
-        sleep(0.2)
+        sleep(0.05)
     
 def server():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
