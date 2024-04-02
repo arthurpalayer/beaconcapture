@@ -1,7 +1,7 @@
 import socket
 
 #define host
-HOST = "10.42.0.1"
+HOST = "127.0.0.1"
 #define port
 PORT = 6969
 BUFFSIZE = 64
