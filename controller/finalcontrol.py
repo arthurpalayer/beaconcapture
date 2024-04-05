@@ -40,14 +40,6 @@ HOST = "10.42.0.1"
 PORT1 = 6969
 PORT2 = 6968
 
-if __name__ == "__main__":
-    t1 = thread.thread(control)
-    t2 = thread.thread(video)
-    t1.start()
-    t2.start()
-    t1.join()
-    t2.join()
-
 def startsock(portnum):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -104,17 +96,25 @@ def controlcheck():
     y2u = uint64(y2.value * 1024)
     y2u = y2u & bitmask
     packet = packet | (y2u << uint64(Y2))
+    packet = int(packet)
     return packet
 
 def control(timeset):
     setupcontrol()
     while (1):
         packet = controlcheck()
-        packet = packet.encode() 
+        packet = struct.pack('!I', aint) 
         s.sendto(packet, (HOST, PORT1))
         time.sleep(timeset)
 
 
-def video():
+if __name__ == "__main__":
+
+    t1 = thread.thread(control)
+    t2 = thread.thread(video)
+    t1.start()
+    t2.start()
+    t1.join()
+    t2.join()
 
 
