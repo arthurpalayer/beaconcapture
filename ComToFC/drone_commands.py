@@ -1,5 +1,6 @@
 from msp import MultiWii
 from util import push16
+from drone import packetconvert
 import time
 import socket
 
@@ -33,14 +34,35 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         if (len(data[0])):
             sendbuffer = "server received data"
             sendbuffer = str.encode(sendbuffer)
-            print("received packet")
-            print(data[0])
+            #print("received packet")
+            #print(data[0])
             addr = data[1]
-            print(addr)
+            #print(addr)
             s.sendto(sendbuffer, addr)
             #s.sendall(sendbuffer, addr[0])
 
+            converted_data = packetconvert(data[1])
             
+            rudder = converted_data[2] / 1024           #left x axis
+            throttle = converted_data[4] / 1024         #left y axis
+            aileron = converted_data[3] / 1024          #right x axis
+            elevator = converted_data[5] / 1024         #right y axis
+
+            buf = []
+            push16(buf, int(aileron * 1000 + 1000))		    # aileron
+            push16(buf, int(elevator * 1000 + 1000))	    # elevator
+            push16(buf, int(throttle * 1000 + 1000))	    # throttle
+            push16(buf, int(rudder * 1000 + 1000))		    # rudder
+            push16(buf, 1500)		                        # aux1
+            push16(buf, 1000)		                        # aux2
+            push16(buf, 1000)		                        # aux3
+            push16(buf, 1000)		                        # aux4
+            board.sendCMD(MultiWii.SET_RAW_RC, buf)
+
+            time.sleep(0.025)
+
+            if(converted_data[1] == 1):
+                break
 
     board.disarm()          #disarm the board
     
