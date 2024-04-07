@@ -66,47 +66,56 @@ def setupcontrol():
 def controlcheck():
     
     print(count)
-    packet = uint64(0)
+    packet = 0
     if (sw0.is_pressed):
-       packet = packet | uint64(32) 
+       packet = packet | 32
     if(sw1.is_pressed):
-        packet = packet | uint64(64)
+        packet = packet | 64
     if (sw2.is_pressed):
-        packet = packet | uint64(128) 
+        packet = packet | 128 
     if (pb0.is_pressed):
-        packet = packet | uint64(1)
+        packet = packet | 1
     if (pb1.is_pressed):
-        packet = packet | uint64(2)
+        packet = packet | 2
     if (pb2.is_pressed):
-        packet = packet | uint64(4)
+        packet = packet | 4
     if (pb3.is_pressed):
-        packet = packet | uint64(8)
+        packet = packet | 8
     if (pb4.is_pressed):
-        packet = packet | uint64(16)
+        packet = packet | 16
 
-    x1u = uint64(x1.value * 1024) #percentage of 1024, can decrease granularity here 
+    x1u = (x1.value * 1024) #percentage of 1024, can decrease granularity here 
     x1u = x1u & bitmask #truncate bits  
-    packet = (x1u << uint64(X1)) 
-    x2u = uint64(x2.value * 1024)
+    packet = (x1u << (X1)) 
+    x2u = (x2.value * 1024)
     x2u = x2u & bitmask
-    packet = packet | (x2u << uint64(X2))
-    y1u = uint64(y1.value * 1024)
+    packet = packet | (x2u << (X2))
+    y1u = (y1.value * 1024)
     y1u = y1u & bitmask
-    packet = packet | (y1u << uint64(Y1))
-    y2u = uint64(y2.value * 1024)
+    packet = packet | (y1u << (Y1))
+    y2u = (y2.value * 1024)
     y2u = y2u & bitmask
-    packet = packet | (y2u << uint64(Y2))
-    packet = int(packet)
+    packet = packet | (y2u << (Y2))
+    packet = (packet)
     return packet
 
 def control(timeset):
     setupcontrol()
     while (1):
         packet = controlcheck()
-        packet = struct.pack('!I', aint) 
+        #        packet = struct.pack('!I', aint) 
+        packet = packet.to_bytes()
         s.sendto(packet, (HOST, PORT1))
         time.sleep(timeset)
 
+def lcd():
+    serial = i2c(port=1, address=0x3c)
+
+    with canvas(device) as draw:
+        draw.rectangle(device.bounding_box, outline="white", fill="black")
+        font = ImageFont.trutype("font.ttf", 14)
+        draw.text((x,y), "", fill = "white", font = font)
+        sleep(0.5)
 
 if __name__ == "__main__":
 
