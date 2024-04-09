@@ -8,6 +8,8 @@ import pickle
 from picamera2.encoders import H264Encoder, Quality
 from picamera2 import picamera2
 import struct
+from msp import MultiWii
+from util import push16
 
 X1 = 38
 X2 = 18
@@ -52,6 +54,25 @@ def packetconvert(packet):
     data[4] = (bindata & (bitmask10 << (Y1)))#y1
     data[5] = (bindata & (bitmask10 << (Y2)))#y2
     return data
+
+def send_command(data, board): 
+    rudder = converted_data[2] / 1024           #left x axis
+    throttle = converted_data[4] / 1024         #left y axis
+    aileron = converted_data[3] / 1024          #right x axis
+    elevator = converted_data[5] / 1024         #right y axis
+
+    buf = []
+    push16(buf, int(aileron * 1000 + 1000))		    # aileron
+    push16(buf, int(elevator * 1000 + 1000))	    # elevator
+    push16(buf, int(throttle * 1000 + 1000))	    # throttle
+    push16(buf, int(rudder * 1000 + 1000))		    # rudder
+    push16(buf, 1500)		                        # aux1
+    push16(buf, 1000)		                        # aux2
+    push16(buf, 1000)		                        # aux3
+    push16(buf, 1000)		                        # aux4
+    board.sendCMD(MultiWii.SET_RAW_RC, buf)
+
+    time.sleep(0.025)
 
 if __name__ = "__main__":
     t1 = thread.Thread(target=videosocket)
