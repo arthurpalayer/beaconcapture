@@ -12,7 +12,7 @@ import socket
 ###########################################################
 
 
-HOST = "127.0.0.1"		#define Host
+HOST = "10.42.0.1"		#define Host
 PORT = 6969			#define port
 BUFFSIZE = 64			#define size of buffer
 
@@ -27,42 +27,34 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
     msg = "recvd" 
     
     board.enable_arm()          #enable arming
-    board.enable()              #arm the board
+    board.arm()              #arm the board
 
     while 1:
-        data = s.recvfrom(BUFFSIZE)
-        if (len(data[0])):
-            sendbuffer = "server received data"
-            sendbuffer = str.encode(sendbuffer)
-            #print("received packet")
-            #print(data[0])
-            #addr = data[1]
-            #print(addr)
-            #            s.sendto(sendbuffer, addr)
-            #s.sendall(sendbuffer, addr[0])
+	    data, addr = s.recvfrom(BUFFSIZE)
+	    data = int.from_bytes(data)
+	    converted_data = packetconvert(data)
+	    print(converted_data[0])
+	    print(converted_data[1])
+	    rudder = converted_data[2] / 1024           #left x axis
+	    throttle = converted_data[4] / 1024         #left y axis
+	    aileron = converted_data[3] / 1024          #right x axis
+	    elevator = converted_data[5] / 1024         #right y axis
 
-            converted_data = packetconvert(data[1])
-            
-            rudder = converted_data[2] / 1024           #left x axis
-            throttle = converted_data[4] / 1024         #left y axis
-            aileron = converted_data[3] / 1024          #right x axis
-            elevator = converted_data[5] / 1024         #right y axis
+	    print(rudder, throttle, elevator, aileron)
+	    buf = []
+	    push16(buf, int(aileron * 1000 + 1000))		    # aileron
+	    push16(buf, int(elevator * 1000 + 1000))	    # elevator
+	    push16(buf, int(throttle * 1000 + 1000))	    # throttle
+	    push16(buf, int(rudder * 1000 + 1000))		    # rudder
+	    push16(buf, 1500)		                        # aux1
+	    push16(buf, 1000)		                        # aux2
+	    push16(buf, 1000)		                        # aux3
+	    push16(buf, 1000)		                        # aux4
+	    board.sendCMD(MultiWii.SET_RAW_RC, buf)
 
-            buf = []
-            push16(buf, int(aileron * 1000 + 1000))		    # aileron
-            push16(buf, int(elevator * 1000 + 1000))	    # elevator
-            push16(buf, int(throttle * 1000 + 1000))	    # throttle
-            push16(buf, int(rudder * 1000 + 1000))		    # rudder
-            push16(buf, 1500)		                        # aux1
-            push16(buf, 1000)		                        # aux2
-            push16(buf, 1000)		                        # aux3
-            push16(buf, 1000)		                        # aux4
-            board.sendCMD(MultiWii.SET_RAW_RC, buf)
-
-            time.sleep(0.025)
-
-            if(converted_data[1] == 1):
-                break
+	    time.sleep(0.025)
+	    if(converted_data[1][0] == 1):
+	        break
 
     board.disarm()          #disarm the board
     
