@@ -43,7 +43,7 @@ def recvcontrol():
     board.arm()
 
     while 1:
-        data,addr =  s.recvfrom(CTLBUFSIZE)
+        addr, data =  s.recvfrom(CTLBUFSIZE)
         data = packetconvert(packet) 
         send_command(data, board)
 
@@ -53,16 +53,22 @@ def packetconvert(packet):
     #packet here is a packed struct 
     #    bindata = struct.unpack('!I', packet)[0]
     bindata = packet
-    bitmask10 = (0x3FF)
-    bitmask5 = (0x1F) 
-    bitmask3 = (0x7)
-    bitmask1 = (0x1)
-    data[0] = (bindata & bitmask5) #pb0 - ph4
-    data[1] = (bindata & bitmask3)#switches
-    data[2] = (bindata & (bitmask10 << (X1))) #x1
-    data[3] = (bindata & (bitmask10 << (X2)))#x2
-    data[4] = (bindata & (bitmask10 << (Y1)))#y1
-    data[5] = (bindata & (bitmask10 << (Y2)))#y2
+    bitmask10 = 0x3FF
+    bitmask5 = 0x1F 
+    bitmask3 = 0x7
+    bitmask1 = 0x1
+    print(bindata)
+    print(type(bindata))
+    data = [0, 0, 0, 0, 0, 0, 0]
+    data[0] = bindata & bitmask5 #pb0 - ph4
+    data[1] = bindata & bitmask3#switches
+    data[2] = bindata & (bitmask10 << (X1)) #x1
+    data[3] = bindata & (bitmask10 << (X2))#x2
+    data[4] = bindata & (bitmask10 << (Y1))#y1
+    data[5] = bindata & (bitmask10 << (Y2))#y2
+    
+    #print(bindata)
+
     return data
 
 def send_command(data, board): 
@@ -84,13 +90,13 @@ def send_command(data, board):
 
     time.sleep(0.025)
 
-if __name__ = "__main__":
-    t1 = thread.Thread(target=videosocket)
-    t2 = thread.Thread(target=recvcontrol)
-    t1.start()
-    t2.start()
-    t1.join()
-    t2.join()
+#if __name__ == "__main__":
+   # t1 = thread.Thread(target=videosocket)
+   # t2 = thread.Thread(target=recvcontrol)
+   # t1.start()
+   # t2.start()
+   # t1.join()
+   # t2.join()
 
 
 
