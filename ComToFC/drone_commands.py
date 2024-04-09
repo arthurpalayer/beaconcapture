@@ -33,12 +33,14 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
 	    data, addr = s.recvfrom(BUFFSIZE)
 	    data = int.from_bytes(data)
 	    converted_data = packetconvert(data)
-			
+	    print(converted_data[0])
+	    print(converted_data[1])
 	    rudder = converted_data[2] / 1024           #left x axis
 	    throttle = converted_data[4] / 1024         #left y axis
 	    aileron = converted_data[3] / 1024          #right x axis
 	    elevator = converted_data[5] / 1024         #right y axis
 
+	    print(rudder, throttle, elevator, aileron)
 	    buf = []
 	    push16(buf, int(aileron * 1000 + 1000))		    # aileron
 	    push16(buf, int(elevator * 1000 + 1000))	    # elevator
@@ -51,7 +53,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
 	    board.sendCMD(MultiWii.SET_RAW_RC, buf)
 
 	    time.sleep(0.025)
-	    if(converted_data[1] == 1):
+	    if(converted_data[1][0] == 1):
 	        break
 
     board.disarm()          #disarm the board
