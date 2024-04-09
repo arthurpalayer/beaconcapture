@@ -16,7 +16,7 @@ Y2 = 8
 SW = 5
 PB = 0
 bitmask10 = 0x03FF
-bitmask = uint64(bitmask10)
+bitmask = (bitmask10)
 PB0 = 14
 PB1 = 27
 PB2 = 18
@@ -46,6 +46,7 @@ def startsock(portnum):
 
 def setupcontrol():
     #copy paste control code here
+    global sw0, sw1, sw2, pb0, pb1, pb2, pb3, pb4, led0, led1, led2, x1, x2, y1, y2
     sw0 = Button(SW0, pull_up=None, active_state=True)
     sw1 = Button(SW1, pull_up=None, active_state=True)
     sw2 = Button(SW2, pull_up=None, active_state=True)
@@ -65,7 +66,6 @@ def setupcontrol():
 
 def controlcheck():
     
-    print(count)
     packet = 0
     if (sw0.is_pressed):
        packet = packet | 32
@@ -84,19 +84,20 @@ def controlcheck():
     if (pb4.is_pressed):
         packet = packet | 16
 
-    x1u = (x1.value * 1024) #percentage of 1024, can decrease granularity here 
+    x1u = int(x1.value * 1024) #percentage of 1024, can decrease granularity here 
     x1u = x1u & bitmask #truncate bits  
     packet = (x1u << (X1)) 
-    x2u = (x2.value * 1024)
+    x2u = int(x2.value * 1024)
     x2u = x2u & bitmask
     packet = packet | (x2u << (X2))
-    y1u = (y1.value * 1024)
-    y1u = y1u & bitmask
+    y1u = int(y1.value * 1024)
+    y1u = (y1u & bitmask)
     packet = packet | (y1u << (Y1))
-    y2u = (y2.value * 1024)
+    y2u = int(y2.value * 1024)
     y2u = y2u & bitmask
     packet = packet | (y2u << (Y2))
-    packet = (packet)
+    packet = int(packet)
+    print(packet)
     return packet
 
 def control(timeset):
@@ -104,7 +105,7 @@ def control(timeset):
     while (1):
         packet = controlcheck()
         #        packet = struct.pack('!I', aint) 
-        packet = packet.to_bytes()
+        packet = packet.to_bytes(16)
         s.sendto(packet, (HOST, PORT1))
         time.sleep(timeset)
 
@@ -118,12 +119,14 @@ def lcd():
         sleep(0.5)
 
 if __name__ == "__main__":
-
-    t1 = thread.thread(control)
-    t2 = thread.thread(video)
-    t1.start()
-    t2.start()
-    t1.join()
-    t2.join()
+    global s
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    control(0.025)
+  #  t1 = thread.Thread(target=control)
+    #t2 = thread.Thread(target=video)
+  #  t1.start()
+  #  t2.start()
+  #  t1.join()
+ #   t2.join()
 
 
