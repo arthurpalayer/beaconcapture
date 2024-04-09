@@ -8,6 +8,7 @@ import pickle
 from picamera2.encoders import H264Encoder, Quality
 from picamera2 import picamera2
 import struct
+
 X1 = 38
 X2 = 18
 Y1 = 28
@@ -19,6 +20,7 @@ PORT1 = 6969
 HOST = "" #fill
 BUFFERSIZE = 4096 
 CTLBUFSIZE = 8
+
 def videosocket():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     cam.start(show_preview=True)
