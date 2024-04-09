@@ -35,9 +35,19 @@ def videosocket():
 def recvcontrol():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
     s.bind((HOST, PORT1))
+
+    board = MultiWii("dev/ttyACM0")
+    time.sleep(1.0)
+
+    board.enable_arm()
+    board.arm()
+
     while 1:
         data,addr =  s.recvfrom(CTLBUFSIZE)
         data = packetconvert(packet) 
+        send_command(data, board)
+
+    board.disarm
 
 def packetconvert(packet):
     #packet here is a packed struct 
