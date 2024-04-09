@@ -36,9 +36,9 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
             sendbuffer = str.encode(sendbuffer)
             #print("received packet")
             #print(data[0])
-            addr = data[1]
+            #addr = data[1]
             #print(addr)
-            s.sendto(sendbuffer, addr)
+            #            s.sendto(sendbuffer, addr)
             #s.sendall(sendbuffer, addr[0])
 
             converted_data = packetconvert(data[1])
