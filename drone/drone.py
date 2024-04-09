@@ -33,23 +33,22 @@ def recvcontrol():
     s.bind((HOST, PORT1))
     while 1:
         data,addr =  s.recvfrom(CTLBUFSIZE)
-        
+        data = packetconvert(packet) 
 
 def packetconvert(packet):
     #packet here is a packed struct 
-    int = struct.unpack('!I', packet)[0]
-    bindata = uint64(int)
-
-    bitmask10 = uint64(0x3FF)
-    bitmask5 = uint64(0x1F) 
-    bitmask3 = uint64(0x7)
-    bitmask1 = uint64(0x1)
-    data[0] = int(bindata & bitmask5) #pb0 - ph4
-    data[1] = int(bindata & bitmask3)#switches
-    data[2] = int(bindata & (bitmask10 << uint64(X1))) #x1
-    data[3] = int(bindata & (bitmask10 << uint64(X2)))#x2
-    data[4] = int(bindata & (bitmask10 << uint64(Y1)))#y1
-    data[5] = int(bindata & (bitmask10 << uint64(Y2)))#y2
+    #    bindata = struct.unpack('!I', packet)[0]
+    bindata = packet
+    bitmask10 = (0x3FF)
+    bitmask5 = (0x1F) 
+    bitmask3 = (0x7)
+    bitmask1 = (0x1)
+    data[0] = (bindata & bitmask5) #pb0 - ph4
+    data[1] = (bindata & bitmask3)#switches
+    data[2] = (bindata & (bitmask10 << (X1))) #x1
+    data[3] = (bindata & (bitmask10 << (X2)))#x2
+    data[4] = (bindata & (bitmask10 << (Y1)))#y1
+    data[5] = (bindata & (bitmask10 << (Y2)))#y2
     return data
 
 if __name__ = "__main__":
