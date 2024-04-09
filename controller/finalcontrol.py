@@ -68,6 +68,7 @@ def controlcheck():
     
     packet = 0
     if (sw0.is_pressed):
+       print("PACKETYAY")
        packet = packet | 32
     if(sw1.is_pressed):
         packet = packet | 64
