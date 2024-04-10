@@ -4,7 +4,7 @@ from drone import packetconvert
 import time
 from drone import videosocket 
 import socket
-
+import threading as thread
 ###########################################################
 #	64 bit packets
 #	47:38 -> x1	37:28 -> y1
@@ -17,7 +17,7 @@ HOST = "10.42.0.1"		#define Host
 PORT = 6969			#define port
 VIDEOPORT = 6968
 BUFFSIZE = 64			#define size of buffer
-
+HOSTSERV = "10.42.0.254"
 def video():
 	videosocket()
 

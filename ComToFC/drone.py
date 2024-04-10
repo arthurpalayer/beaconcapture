@@ -5,11 +5,12 @@ import threading as thread
 import time
 import socket
 import pickle
-from picamera2.encoders import H264Encoder, Quality
-from picamera2 import picamera2
+from picamera2 import Picamera2
 import struct
 from msp import MultiWii
 from util import push16
+import cv2
+
 
 X1 = 38
 X2 = 18
@@ -22,6 +23,8 @@ PORT1 = 6969
 HOST = "" #fill
 BUFFERSIZE = 4096 
 CTLBUFSIZE = 8
+HOST = "10.42.0.1"
+HOSTSERV = "10.42.0.254"
 
 def videosocket():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -31,7 +34,7 @@ def videosocket():
         im = cam.capture_array()
         ret, buffer = cv2.imencode(".jpg", im, [int(cv2.IMWRITE_JPEG_QUALITY), 30])
         x = pickle.dumps(buffer)
-        s.sendto(x, (HOST, PORT0))
+        s.sendto(x, (HOSTSERV, PORT0))
 
 def recvcontrol():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
