@@ -26,8 +26,8 @@ SW0 = 24
 SW1 = 23
 SW2 = 22
 LED0 = 13
-LED1 = 6
-LED2 = 16
+LED1 = 16 
+LED2 = 6
 MOSI = 9
 MISO = 10
 CS0 = 8
@@ -127,22 +127,31 @@ def control(timeset):
         packet = controlcheck()
         #        packet = struct.pack('!I', aint) 
         packet = packet.to_bytes(16)
+        led1.off()
         s.sendto(packet, (HOST, PORT1))
-        time.sleep(timeset)
+        led1.on()
+        time.sleep(timeset )
 
 def lcd():
     serial = i2c(port=1, address=0x3c)
 
     with canvas(device) as draw:
         draw.rectangle(device.bounding_box, outline="white", fill="black")
+        if (sw0.is_pressed()):
+            status = "MANUAL MODE"
+        else:
+            status = "AUTO"
         font = ImageFont.trutype("font.ttf", 14)
-        draw.text((x,y), "", fill = "white", font = font)
+        draw.text((x,y), status, fill = "white", font = font)
         sleep(0.5)
+
+def video():
+
 
 if __name__ == "__main__":
     global s
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    control(0.025)
+    control(0.005)
   #  t1 = thread.Thread(target=control)
     #t2 = thread.Thread(target=video)
   #  t1.start()
