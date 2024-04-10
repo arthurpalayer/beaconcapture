@@ -65,26 +65,46 @@ def setupcontrol():
     y2 = MCP3002(channel=1, clock_pin=SCLK, mosi_pin=MOSI, miso_pin=MISO, select_pin=CS1)
 
 def controlcheck():
-    
+
     packet = 0
+    dataset = []
     if (sw0.is_pressed):
-       print("PACKETYAY")
-       packet = packet | 32
+      # print("PACKETYAY")
+        packet = packet | 32
+        dataset.append("Switch 0: ON")
+        led0.on()
+    else:
+        led0.off()
     if(sw1.is_pressed):
         packet = packet | 64
+        led1.on()
+        dataset.append("SWITCH 1: ON")
+    else:
+        led1.off()
     if (sw2.is_pressed):
+        dataset.append("SWITHC 2: ON")
+        led2.on()
         packet = packet | 128 
+    else:
+        led2.off()
     if (pb0.is_pressed):
+        dataset.append("PB0 : ON")
         packet = packet | 1
     if (pb1.is_pressed):
+        dataset.append("PB1 : ON")
         packet = packet | 2
     if (pb2.is_pressed):
+        dataset.append("PB2: ON")
         packet = packet | 4
     if (pb3.is_pressed):
+        dataset.append("PB3: ON")
         packet = packet | 8
     if (pb4.is_pressed):
+        dataset.append("PB4: ON")
         packet = packet | 16
+    print(dataset)
 
+    dataset.clear()
     x1u = int(x1.value * 1024) #percentage of 1024, can decrease granularity here 
     x1u = x1u & bitmask #truncate bits  
     packet = (x1u << (X1)) 
