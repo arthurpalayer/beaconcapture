@@ -15,9 +15,10 @@ import threading as thread
 
 HOST = "10.42.0.1"		#define Host
 PORT = 6969			#define port
-VIDEOPORT = 6968
+VIDEOPORT = 6967
 BUFFSIZE = 64			#define size of buffer
 HOSTSERV = "10.42.0.254"
+
 def video():
 	videosocket()
 

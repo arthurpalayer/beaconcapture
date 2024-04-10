@@ -2,7 +2,7 @@ import gpiozero
 import numpy as np
 from numpy import uint64
 import threading as thread
-import time
+import time.sleep
 import socket
 import pickle
 from picamera2 import Picamera2
@@ -17,13 +17,11 @@ X2 = 18
 Y1 = 28
 Y2 = 8
 
-VIDPORT = 6968
+VIDPORT = 6967
 CTRLPORT = 6969
-HOST = "" #fill
 BUFFERSIZE = 4096 
 CTLBUFSIZE = 8
 HOST = "10.42.0.1"
-
 
 def makeconn(s):
     data, addr = s.recvfrom(8)
@@ -39,7 +37,9 @@ def videosocket():
         im = cam.capture_array()
         ret, buffer = cv2.imencode(".jpg", im, [int(cv2.IMWRITE_JPEG_QUALITY), 30])
         x = pickle.dumps(buffer)
-        s.sendto(x, addr)
+        s.sendto(x, addr) 
+	time.sleep(0.026)
+	print("1")
 
 def recvcontrol():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
