@@ -6,7 +6,7 @@ import subprocess
 cmd1 = "--"
 
 
-ip = "127.0.0.1"
+ip = "10.42.0.254"
 port = 6968
 
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 

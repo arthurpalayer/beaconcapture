@@ -3,19 +3,24 @@ import socket
 #define host
 HOST = "127.0.0.1"
 #define port
-PORT = 6001
-
+PORT = 6969
+BUFFSIZE = 64
 
 with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
     s.bind((HOST, PORT))
-    s.listen()
+   
     msg = "recvd" 
     
-    conn, addr = s.accept()
+    
     while 1:
-        data = conn.recv(512)
-        if (len(data)):
+        data = s.recvfrom(BUFFSIZE)
+        if (len(data[0])):
             sendbuffer = "server received data"
-            conn.send(sendbuffer.encode())
-            print(data)
-        if conn.timeout 
+            sendbuffer = str.encode(sendbuffer)
+            print("received packet")
+            print(data[0])
+            addr = data[1]
+            print(addr)
+            s.sendto(sendbuffer, addr)
+            #s.sendall(sendbuffer, addr[0])
+         
