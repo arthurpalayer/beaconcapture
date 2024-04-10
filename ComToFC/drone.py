@@ -17,28 +17,33 @@ X2 = 18
 Y1 = 28
 Y2 = 8
 
-
-PORT0 = 6968
-PORT1 = 6969
+VIDPORT = 6968
+CTRLPORT = 6969
 HOST = "" #fill
 BUFFERSIZE = 4096 
 CTLBUFSIZE = 8
 HOST = "10.42.0.1"
-HOSTSERV = "10.42.0.254"
+
+
+def makeconn(s):
+    data, addr = s.recvfrom(8)
+    return addr
 
 def videosocket():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.bind((HOST, VIDPORT))
+    addr = makeconn(s)
     cam = Picamera2() 
     cam.start(show_preview=True)
     while 1:
         im = cam.capture_array()
         ret, buffer = cv2.imencode(".jpg", im, [int(cv2.IMWRITE_JPEG_QUALITY), 30])
         x = pickle.dumps(buffer)
-        s.sendto(x, (HOSTSERV, PORT0))
+        s.sendto(x, addr)
 
 def recvcontrol():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
-    s.bind((HOST, PORT1))
+    s.bind((HOST, CTRLPORT))
 
     board = MultiWii("dev/ttyACM0")
     time.sleep(1.0)

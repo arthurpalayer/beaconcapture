@@ -153,17 +153,18 @@ def lcd():
         draw.text((x,y), status, fill = "white", font = font)
         sleep(0.5)
 
+def makeconns(s):
+    msg = "utf"
+    s.sendto(msg.encode('utf-8'), (HOST, VIDPORT))
 
 def videosocket():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.bind((HOSTSERV, PORT1))
-    print("1")
+    makeconns(s)
     while 1:
         data, addr = s.recvfrom(VIDBUFFSIZE)
-        print(data)
         data = pickle.loads(data)
         data = cv2.imdecode(data, cv2.IMREAD_COLOR)
-        cv2.imshow("YAGADGISDJBG", data)
+        cv2.imshow("LIVE FEED", data)
         
 def donothing():
     time.sleep(0.2)
