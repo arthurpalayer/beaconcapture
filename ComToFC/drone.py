@@ -25,6 +25,7 @@ CTLBUFSIZE = 8
 
 def videosocket():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    cam = Picamera2() 
     cam.start(show_preview=True)
     while 1:
         im = cam.capture_array()
