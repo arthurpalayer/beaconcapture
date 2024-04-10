@@ -5,7 +5,12 @@ from gpiozero import Button, LED, MCP3002
 import socket
 import numpy as np
 import threading as thread
-import vlc
+from picamera2.outputs import FileOutput
+import io
+import cv2
+import pickle
+from picamera2 import Picamera2
+
 #######64 bit packets 47:38 x1, 37:28 y1, 27:18 x2, 17:8 y2, 7:5 sw, 4:0 buttons
 
 #SHAMTS
@@ -145,18 +150,23 @@ def lcd():
         draw.text((x,y), status, fill = "white", font = font)
         sleep(0.5)
 
-def video():
-
+def videoserver():
+    s.bind((HOST, PORT1))
+    while 1:
+        data, addr = s.recvfrom(VIDBUFFSIZE)
+        data = pickle.loads(data)
+        data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+        cv2.imshow("YAGADGISDJBG", data)
+        
 
 if __name__ == "__main__":
     global s
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    control(0.005)
-  #  t1 = thread.Thread(target=control)
-    #t2 = thread.Thread(target=video)
-  #  t1.start()
-  #  t2.start()
-  #  t1.join()
- #   t2.join()
+    t1 = thread.Thread(target=control, args=0.005)
+    t2 = thread.Thread(target=video)
+    t1.start()
+    t2.start()
+    t1.join()
+    t2.join()
 
 
