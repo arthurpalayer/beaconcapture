@@ -38,11 +38,10 @@ SCLK = 11
 
 #HOST = "127.0.0.1"
 HOST = "10.42.0.1"
-HOSTSERV = "10.42.0.254"
 PORT1 = 6969
-PORT2 = 6968
+PORT2 = 6969
 VIDBUFFSIZE = 1000000
-
+VIDPORT = 6967
 
 
 def setupcontrol():
@@ -162,16 +161,17 @@ def videosocket():
     makeconns(s)
     while 1:
         data, addr = s.recvfrom(VIDBUFFSIZE)
+        print("1")
         data = pickle.loads(data)
         data = cv2.imdecode(data, cv2.IMREAD_COLOR)
         cv2.imshow("LIVE FEED", data)
+        sleep(0.25)
         
 def donothing():
     time.sleep(0.2)
 
 if __name__ == "__main__":
-    global s
-    t1 = thread.Thread(target=donothing)
+    t1 = thread.Thread(target=control)
     t2 = thread.Thread(target=videosocket)
     t1.start()
     t2.start()
