@@ -152,27 +152,12 @@ def lcd():
         draw.text((x,y), status, fill = "white", font = font)
         sleep(0.5)
 
-def makeconns(s):
-    msg = "utf"
-    s.sendto(msg.encode('utf-8'), (HOST, VIDPORT))
-
-def videosocket():
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    makeconns(s)
-    while 1:
-        data, addr = s.recvfrom(VIDBUFFSIZE)
-        print("1")
-        data = pickle.loads(data)
-        data = cv2.imdecode(data, cv2.IMREAD_COLOR)
-        cv2.imshow("LIVE FEED", data)
-        sleep(0.25)
-        
 def donothing():
     time.sleep(0.2)
 
 if __name__ == "__main__":
     t1 = thread.Thread(target=control)
-    t2 = thread.Thread(target=videosocket)
+    t2 = thread.Thread(target=videorecv)
     t1.start()
     t2.start()
     t1.join()
