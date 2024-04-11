@@ -82,13 +82,13 @@ def send_command(data, board):
 
     time.sleep(0.025)
 
-#if __name__ == "__main__":
-   # t1 = thread.Thread(target=videosocket)
-   # t2 = thread.Thread(target=recvcontrol)
-   # t1.start()
-   # t2.start()
-   # t1.join()
-   # t2.join()
+if __name__ == "__main__":
+    t1 = thread.Thread(target=videoserver)
+    t2 = thread.Thread(target=recvcontrol)
+    t1.start()
+    t2.start()
+    t1.join()
+    t2.join()
 
 
 
