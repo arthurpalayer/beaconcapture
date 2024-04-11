@@ -23,23 +23,6 @@ BUFFERSIZE = 4096
 CTLBUFSIZE = 8
 HOST = "10.42.0.1"
 
-def makeconn(s):
-    data, addr = s.recvfrom(8)
-    return addr
-
-def videosocket():
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.bind((HOST, VIDPORT))
-    addr = makeconn(s)
-    cam = Picamera2() 
-    cam.start(show_preview=True)
-    while 1:
-        im = cam.capture_array()
-        ret, buffer = cv2.imencode(".jpg", im, [int(cv2.IMWRITE_JPEG_QUALITY), 30])
-        x = pickle.dumps(buffer)
-        s.sendto(x, addr) 
-	time.sleep(0.026)
-	print("1")
 
 def recvcontrol():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 

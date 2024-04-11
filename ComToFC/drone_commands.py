@@ -16,12 +16,9 @@ import threading as thread
 
 HOST = "10.42.0.1"		#define Host
 PORT = 6969			#define port
-VIDEOPORT = 6967
 BUFFSIZE = 64			#define size of buffer
 HOSTSERV = "10.42.0.254"
 
-def video():
-	videosocket()
 
 def control():
 	board = MultiWii("/dev/ttyACM0")
@@ -81,7 +78,7 @@ def control():
 	    
 if __name__ == "__main__":
 	t1 = thread.Thread(target=control)
-	t2 = thread.Thread(target=video)
+	t2 = thread.Thread(target=videoserver)
 	t1.start()
 	t2.start()
 	t1.join()
