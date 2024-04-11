@@ -10,7 +10,7 @@ VIDBUFFSIZE = 100000
 PACKETSIZE = 8
 
 def makeconn(s):
-    data, addr = s.recfrom(PACKETSIZE)
+    data, addr = s.recvfrom(PACKETSIZE)
     return addr
 
 def sendconn(s):
@@ -36,7 +36,7 @@ def videorecv():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sendconn(s)
     while 1:
-        data, addr = s.recfrom(VIDBUFFSIZE)
+        data, addr = s.recvfrom(VIDBUFFSIZE)
         data = pickle.loads(data)
         data = cv2.imdecode(data, cv2.IMREAD_COLOR)
         cv2.imshow("LIVEFEED", data)
