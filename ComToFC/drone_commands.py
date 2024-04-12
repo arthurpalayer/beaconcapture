@@ -92,9 +92,9 @@ def testswitch():
 
 if __name__ == "__main__":
 	t1 = thread.Thread(target=testswitch)
-	t2 = thread.Thread(target=video.videoserver)
+	#t2 = thread.Thread(target=video.videoserver)
 	t1.start()
-	t2.start()
+	#t2.start()
 	t1.join()
-	t2.join()
+	#t2.join()
 
