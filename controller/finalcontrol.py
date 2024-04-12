@@ -24,8 +24,8 @@ PB2 = 18
 PB3 = 17
 PB4 = 15
 SW0 = 24
-SW1 = 23
-SW2 = 22
+SW1 = 22
+SW2 = 23
 LED0 = 13
 LED1 = 16 
 LED2 = 6
@@ -42,7 +42,8 @@ PORT1 = 6969
 PORT2 = 6969
 VIDBUFFSIZE = 1000000
 VIDPORT = 6967
-
+global sens
+sens = 3
 
 def setupcontrol():
     #copy paste control code here
@@ -109,18 +110,19 @@ def controlcheck():
     if (pb4.is_pressed):
         dataset.append("PB4: ON")
         packet = packet | 16
-
+    print(dataset)
+    print(packet)
     dataset.clear()
-    x1u = int(x1.value * 1024) #percentage of 1024, can decrease granularity here 
+    x1u = int(round(x1.value, sens) * 1024) #percentage of 1024, can decrease granularity here 
     x1u = x1u & bitmask #truncate bits  
-    packet = (x1u << (X1)) 
-    x2u = int(x2.value * 1024)
+    packet = packet | (x1u << (X1)) 
+    x2u = int(round(x2.value, sens) * 1024)
     x2u = x2u & bitmask
     packet = packet | (x2u << (X2))
-    y1u = int(y1.value * 1024)
+    y1u = int(round(y1.value, sens) * 1024)
     y1u = (y1u & bitmask)
     packet = packet | (y1u << (Y1))
-    y2u = int(y2.value * 1024)
+    y2u = int(round(y2.value, sens) * 1024)
     y2u = y2u & bitmask
     packet = packet | (y2u << (Y2))
     packet = int(packet)
@@ -144,10 +146,16 @@ def lcd():
 
     with canvas(device) as draw:
         draw.rectangle(device.bounding_box, outline="white", fill="black")
-        if (sw0.is_pressed()):
+        if (pb0.is_pressed()):
+            status = "LANDING"
+        elif (sw2.is_pressed() & sw0.is_pressed == False):
             status = "MANUAL MODE"
+        elif (sw2.is_pressed() & sw0.is_pressed()):
+            status = "AUTO MODE"
+        elif (sw2.is_pressed() == False):
+            status = "HOVER MODE"
         else:
-            status = "AUTO"
+            status = "INITIATING"
         font = ImageFont.trutype("font.ttf", 14)
         draw.text((x,y), status, fill = "white", font = font)
         sleep(0.5)
@@ -157,7 +165,7 @@ def donothing():
 
 if __name__ == "__main__":
     t1 = thread.Thread(target=control)
-    t2 = thread.Thread(target=videorecv)
+    t2 = thread.Thread(target=video.videorecv)
     t1.start()
     t2.start()
     t1.join()
