@@ -51,8 +51,9 @@ def packetconvert(packet):
     bitmask1 = 0x1
 #    print(bindata)
  #   print(type(bindata))
-    data = [[0, 0, 0, 0, 0],[0,0,0], 0, 0, 0, 0, 0]
-    data[0] = [bindata & 1, bindata & 2, bindata & 4, bindata & 8, bindata & 16] #pb0 - ph4
+    data = [0,[0,0,0], 0, 0, 0, 0, 0]
+    #data[0] = [bindata & 1, bindata & 2, bindata & 4, bindata & 8, bindata & 16] #pb0 - ph4
+    data[0] = bindata & 0x1f
     print(data[0])
     print(bindata)
     data[1] = [bindata & 32, bindata & 64, bindata & 128]#switches
