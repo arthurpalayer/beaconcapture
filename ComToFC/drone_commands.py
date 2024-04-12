@@ -75,9 +75,19 @@ def control():
 
 			board.disarm()          #disarm the board
 			board.disable_arm()
-	    
+
+def testswitch():
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+        s.bind((HOST, PORT1))
+        while 1:
+            data, addr = s.recvfrom(BUFFSIZE)
+            data = int.from_bytes(data)
+            converted_data = packetconvert(data)
+            print(data[0])
+            print(data[1])
+
 if __name__ == "__main__":
-	t1 = thread.Thread(target=control)
+	t1 = thread.Thread(target=testswitch)
 	t2 = thread.Thread(target=videoserver)
 	t1.start()
 	t2.start()
