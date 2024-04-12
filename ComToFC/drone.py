@@ -2,7 +2,7 @@ import gpiozero
 import numpy as np
 from numpy import uint64
 import threading as thread
-import time.sleep
+import time
 import socket
 import pickle
 from picamera2 import Picamera2
