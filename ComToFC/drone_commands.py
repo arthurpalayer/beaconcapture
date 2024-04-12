@@ -1,8 +1,7 @@
 from msp import MultiWii
 from util import push16
 from drone import packetconvert
-import time
-from drone import videosocket 
+import time 
 import video
 import socket
 import threading as thread
@@ -78,17 +77,22 @@ def control():
 
 def testswitch():
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-        s.bind((HOST, PORT1))
+        s.bind((HOST, PORT))
         while 1:
             data, addr = s.recvfrom(BUFFSIZE)
             data = int.from_bytes(data)
             converted_data = packetconvert(data)
-            print(data[0])
-            print(data[1])
+            print(converted_data[0])
+            print(converted_data[1])
+	   # print(converted_data[2])
+	   # print(converted_data[3])
+	   # print(converted_data[4])
+	   # print(converted_data[5])
+
 
 if __name__ == "__main__":
 	t1 = thread.Thread(target=testswitch)
-	t2 = thread.Thread(target=videoserver)
+	t2 = thread.Thread(target=video.videoserver)
 	t1.start()
 	t2.start()
 	t1.join()
