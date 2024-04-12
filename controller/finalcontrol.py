@@ -145,20 +145,21 @@ def lcd():
     serial = i2c(port=1, address=0x3c)
 
     with canvas(device) as draw:
-        draw.rectangle(device.bounding_box, outline="white", fill="black")
-        if (pb0.is_pressed()):
-            status = "LANDING"
-        elif (sw2.is_pressed() & sw0.is_pressed == False):
-            status = "MANUAL MODE"
-        elif (sw2.is_pressed() & sw0.is_pressed()):
-            status = "AUTO MODE"
-        elif (sw2.is_pressed() == False):
-            status = "HOVER MODE"
-        else:
-            status = "INITIATING"
-        font = ImageFont.trutype("font.ttf", 14)
-        draw.text((x,y), status, fill = "white", font = font)
-        sleep(0.5)
+        while 1: 
+            draw.rectangle(device.bounding_box, outline="white", fill="black")
+            if (pb0.is_pressed()):
+                status = "LANDING"
+            elif (sw2.is_pressed() & sw0.is_pressed == False):
+                status = "MANUAL MODE"
+            elif (sw2.is_pressed() & sw0.is_pressed()):
+                status = "AUTO MODE"
+            elif (sw2.is_pressed() == False):
+                status = "HOVER MODE"
+            else:
+                status = "INITIATING"
+            font = ImageFont.trutype("font.ttf", 14)
+            draw.text((x,y), status, fill = "white", font = font)
+            sleep(0.05)
 
 def donothing():
     time.sleep(0.2)
@@ -166,9 +167,12 @@ def donothing():
 if __name__ == "__main__":
     t1 = thread.Thread(target=control)
     t2 = thread.Thread(target=video.videorecv)
+    t3 = thread.Thread(target=lcd) 
     t1.start()
+    t3.start()
     t2.start()
     t1.join()
     t2.join()
+    t3.join()
 
 
