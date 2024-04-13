@@ -11,6 +11,18 @@ import threading as thread
 #	27:18 -> x2	17:8 -> y2
 #	7:5 -> sw	4:0 -> buttons
 ###########################################################
+def low_motor(board, speed):
+	buf = []
+	push16(buf, speed)
+	push16(buf, speed)
+	push16(buf, speed)
+	push16(buf, speed)
+	push16(buf, 1500)
+	push16(buf, 1000)
+	push16(buf, 1000)
+	push16(buf, 1000)
+	board.senCMD(MultiWii.Set_RAW_RC, buf)
+	time.sleep(0.025)
 
 
 HOST = "10.42.0.1"		#define Host
@@ -37,43 +49,42 @@ def control():
 				converted_data = packetconvert(data)
 				#print(converted_data[0])
 				#print(converted_data[1])
-				rudder = converted_data[2] / 1024           #left x axis
-				throttle = converted_data[4] / 1024         #left y axis
-				aileron = converted_data[3] / 1024          #right x axis
-				elevator = converted_data[5] / 1024         #right y axis
+				if converted_data[1][2]:
+					rudder = converted_data[2] / 1024           #left x axis
+					throttle = converted_data[4] / 1024         #left y axis
+					aileron = converted_data[3] / 1024          #right x axis
+					elevator = converted_data[5] / 1024         #right y axis
 
-				print(rudder, throttle, elevator, aileron)
-				buf = []
-				push16(buf, int(aileron * 1000 + 1000))		    # aileron
-				push16(buf, int(elevator * 1000 + 1000))	    # elevator
-				push16(buf, int(throttle * 1000 + 1000))	    # throttle
-				push16(buf, int(rudder * 1000 + 1000))		    # rudder
-				push16(buf, 1500)		                        # aux1
-				push16(buf, 1000)		                        # aux2
-				push16(buf, 1000)		                        # aux3
-				push16(buf, 1000)		                        # aux4
-				board.sendCMD(MultiWii.SET_RAW_RC, buf)
+					print(rudder, throttle, elevator, aileron)
+					buf = []
+					push16(buf, int(aileron * 1000 + 1000))		    # aileron
+					push16(buf, int(elevator * 1000 + 1000))	    # elevator
+					push16(buf, int(throttle * 1000 + 1000))	    # throttle
+					push16(buf, int(rudder * 1000 + 1000))		    # rudder
+					push16(buf, 1500)		                        # aux1
+					push16(buf, 1000)		                        # aux2
+					push16(buf, 1000)		                        # aux3
+					push16(buf, 1000)		                        # aux4
+					board.sendCMD(MultiWii.SET_RAW_RC, buf)
+				elif(not converted_data[1][2] and not converted_data[0][1] 
+					print("Manual control off")
+					low_motor(board, 1500)
 
-				time.sleep(0.005)
-				if(converted_data[1][0] == 1):
+				elif(converted_data[0] != 0):
+					print("falling")
 					break
+				time.sleep(0.025)	
 
 		except KeyboardInterrupt:
 			for x in range(20):
-				buf = [] 
-				push16(buf, 1000)
-				push16(buf, 1000)
-				push16(buf, 1000)
-				push16(buf, 1000)
-				push16(buf, 1000)
-				push16(buf, 1000)
-				push16(buf, 1000)
-				push16(buf, 1000)
-				board.sendCMD(MultiWii.SET_RAW_RC, buf)
-				time.sleep(0.025)
+				low_motor(board, 1300)
 
 			board.disarm()          #disarm the board
 			board.disable_arm()
+		
+		low_motor(board,1300)
+		board.disarm()
+		board.disable_arm()
 
 def testswitch():
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
