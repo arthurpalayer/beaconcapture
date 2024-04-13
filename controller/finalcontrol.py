@@ -40,8 +40,8 @@ CS1 = 7
 SCLK = 11
 
 
-HOST = "127.0.0.1"
-#HOST = "10.42.0.1"
+#HOST = "127.0.0.1"
+HOST = "10.42.0.1"
 PORT1 = 6969
 PORT2 = 6969
 VIDBUFFSIZE = 1000000
@@ -114,8 +114,8 @@ def controlcheck():
     if (pb4.is_pressed):
         dataset.append("PB4: ON")
         packet = packet | 16
-    print(dataset)
-    print(packet)
+    #print(dataset)
+   # print(packet)
     dataset.clear()
     x1u = int(round(x1.value, sens) * 1024) #percentage of 1024, can decrease granularity here 
     x1u = x1u & bitmask #truncate bits  
@@ -130,6 +130,7 @@ def controlcheck():
     y2u = y2u & bitmask
     packet = packet | (y2u << (Y2))
     packet = int(packet)
+    
     return packet
 
 def control():
@@ -140,10 +141,20 @@ def control():
         packet = controlcheck()
         #        packet = struct.pack('!I', aint) 
         packet = packet.to_bytes(16)
-        led1.off()
-        s.sendto(packet, (HOST, PORT2))
-        led1.on()
-        time.sleep(timeset )
+    
+        try: 
+            s.sendto(packet, (HOST, PORT2))
+            print("send success")
+        except:
+            print("no connection")
+            pass
+        try:
+            data, addr = s.recvfrom(20)
+            data = data.decode()
+            print(data)
+        except:
+            print("no msg")
+            pass
 
 def lcd():
     serial = i2c(port=1, address=0x3c)
@@ -172,13 +183,13 @@ def donothing():
 
 if __name__ == "__main__":
     t1 = thread.Thread(target=control)
-    t2 = thread.Thread(target=video.videorecv)
-    t3 = thread.Thread(target=lcd) 
+#    t2 = thread.Thread(target=video.videorecv)
+#    t3 = thread.Thread(target=lcd) 
     t1.start()
-    t3.start()
-    t2.start()
+#    t3.start()
+#    t2.start()
     t1.join()
-    t2.join()
-    t3.join()
+#    t2.join()
+#    t3.join()
 
 
