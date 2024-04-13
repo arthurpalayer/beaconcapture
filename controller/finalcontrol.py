@@ -36,8 +36,8 @@ CS1 = 7
 SCLK = 11
 
 
-#HOST = "127.0.0.1"
-HOST = "10.42.0.1"
+HOST = "127.0.0.1"
+#HOST = "10.42.0.1"
 PORT1 = 6969
 PORT2 = 6969
 VIDBUFFSIZE = 1000000
@@ -143,7 +143,9 @@ def control():
 
 def lcd():
     serial = i2c(port=1, address=0x3c)
-
+    device = ssd1306(serial)
+    x = 2
+    y = 15
     with canvas(device) as draw:
         while 1: 
             draw.rectangle(device.bounding_box, outline="white", fill="black")
