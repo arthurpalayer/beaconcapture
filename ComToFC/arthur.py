@@ -23,22 +23,22 @@ def control():
 				time.sleep(0.05)
 				print("no connection")
 
-        print("arming")		
+		print("arming")		
 		try: 
 			while 1:
 				data, addr = s.recvfrom(BUFFSIZE)
-                data = int.from_bytes(data)
+				data = int.from_bytes(data)
 				converted_data = packetconvert(data)
 
-                #converted data[0] encoding scheme:
-                #                     0x1F = disarm
-                #                     0x1 = Manual
-                #                     0x2 = AUTO
-                #                     0x4 = HOVER
-                #
+				#converted data[0] encoding scheme:
+				#                     0x1F = disarm
+				#                     0x1 = Manual
+				#                     0x2 = AUTO
+				#                     0x4 = HOVER
+				#
 
 				if(converted_data[0] == 0xF):
-                    print("RECEIVED KILL")
+					print("RECEIVED KILL")
 					break
 
 				elif (converted_data[0] == 0x1):
@@ -47,36 +47,36 @@ def control():
 					aileron = converted_data[3] / 1024          #right x axis
 					elevator = converted_data[5] / 1024         #right y axis
 					print(rudder, throttle, elevator, aileron)
-                    push16(buf, rudder * 1000 + 1000)
-                    push16(buf, throttle * 1000 + 1000)
-                    push16(buf, aileron * 1000 + 1000)
-                    push16(buf, elevator * 1000 + 1000)
-                    print(buf)
+					push16(buf, rudder * 1000 + 1000)
+					push16(buf, throttle * 1000 + 1000)
+					push16(buf, aileron * 1000 + 1000)
+					push16(buf, elevator * 1000 + 1000)
+					print(buf)
 				elif(not converted_data[0] == 0x2):
 					print("Manual control off")
-                
+				
 		except KeyboardInterrupt:
-            print("DISARMING DUE TO SIGINT")
+			print("DISARMING DUE TO SIGINT")
 #			landing(board)
 	return
 
 def testswitch():
-    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-        s.bind((HOST, PORT))
-        while 1:
-            data, addr = s.recvfrom(BUFFSIZE)
-            data = int.from_bytes(data)
-            converted_data = packetconvert(data)
-            print(converted_data[0])
-            print(converted_data[1])
+	with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+		s.bind((HOST, PORT))
+		while 1:
+			data, addr = s.recvfrom(BUFFSIZE)
+			data = int.from_bytes(data)
+			converted_data = packetconvert(data)
+			print(converted_data[0])
+			print(converted_data[1])
 
 if __name__ == "__main__":
-    if (1 == 0):
-        t1 = thread.Thread(target=control)
-        t2 = thread.Thread(target=video.videoserver)
-        t1.start()
-        t2.start()
-        t1.join()
-        t2.join()
-    else:
-        control()
+	if (1 == 0):
+		t1 = thread.Thread(target=control)
+		t2 = thread.Thread(target=video.videoserver)
+		t1.start()
+		t2.start()
+		t1.join()
+		t2.join()
+	else:
+		control()

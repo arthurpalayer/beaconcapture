@@ -48,7 +48,7 @@ def control():
 			except: 
 				time.sleep(0.05)
 				print("no connection")
-                pass
+				pass
 
 		board.enable_arm()          #enable arming
 		board.arm()              #arm the board
@@ -56,20 +56,20 @@ def control():
 		try: 
 			while 1:
 				data, addr = s.recvfrom(BUFFSIZE)
-                data = int.from_bytes(data)
+				data = int.from_bytes(data)
 				converted_data = packetconvert(data)
 
 
 
-                #converted data[0] encoding scheme:
-                #                     0x1F = disarm
-                #                     0x1 = Manual
-                #                     0x2 = AUTO
-                #                     0x4 = HOVER
-                #
+				#converted data[0] encoding scheme:
+				#                     0x1F = disarm
+				#                     0x1 = Manual
+				#                     0x2 = AUTO
+				#                     0x4 = HOVER
+				#
 				if(converted_data[0] == 0xF):
 					board.disarm()
-                    board.disable_arm()
+					board.disable_arm()
 					break
 				elif (converted_data[0] == 0x1):
 
@@ -93,7 +93,7 @@ def control():
 				elif(not converted_data[0] == 0x2):
 					print("Manual control off")
 					low_motor(board, 1500)
-                
+				
 
 		except KeyboardInterrupt:
 #			landing(board)
@@ -102,14 +102,14 @@ def control():
 	return
 
 def testswitch():
-    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-        s.bind((HOST, PORT))
-        while 1:
-            data, addr = s.recvfrom(BUFFSIZE)
-            data = int.from_bytes(data)
-            converted_data = packetconvert(data)
-            print(converted_data[0])
-            print(converted_data[1])
+	with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+		s.bind((HOST, PORT))
+		while 1:
+			data, addr = s.recvfrom(BUFFSIZE)
+			data = int.from_bytes(data)
+			converted_data = packetconvert(data)
+			print(converted_data[0])
+			print(converted_data[1])
 
 if __name__ == "__main__":
 #	t1 = thread.Thread(target=control)
