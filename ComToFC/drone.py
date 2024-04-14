@@ -68,10 +68,10 @@ def packetconvert(packet):
     return data
 
 def send_command(data, board): 
-    rudder = converted_data[2] / 1024           #left x axis
-    throttle = converted_data[4] / 1024         #left y axis
-    aileron = converted_data[3] / 1024          #right x axis
-    elevator = converted_data[5] / 1024         #right y axis
+    rudder = converted_data[2] / 1023           #left x axis
+    throttle = converted_data[4] / 1023         #left y axis
+    aileron = converted_data[3] / 1023          #right x axis
+    elevator = converted_data[5] / 1023         #right y axis
 
     buf = []
     push16(buf, int(aileron * 1000 + 1000))		    # aileron

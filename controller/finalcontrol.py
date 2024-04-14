@@ -11,6 +11,7 @@ from luma.oled.device import ssd1306
 from PIL import ImageFont
 import pickle
 import video
+import selectors
 #######64 bit packets 47:38 x1, 37:28 y1, 27:18 x2, 17:8 y2, 7:5 sw, 4:0 buttons
 
 #SHAMTS
@@ -48,10 +49,6 @@ VIDBUFFSIZE = 1000000
 VIDPORT = 6967
 
 sens = 3
-manualmode = False
-automode = False
-hovermode = False
-disarmnow = False
 
 sw0 = Button(SW0, pull_up=None, active_state=True)
 sw1 = Button(SW1, pull_up=None, active_state=True)
@@ -68,13 +65,17 @@ x1 = MCP3002(channel=0, clock_pin=SCLK, mosi_pin=MOSI, miso_pin=MISO, select_pin
 x2 = MCP3002(channel=0, clock_pin=SCLK, mosi_pin=MOSI, miso_pin=MISO, select_pin=CS1)
 y1 = MCP3002(channel=1, clock_pin=SCLK, mosi_pin=MOSI, miso_pin=MISO, select_pin=CS0)
 y2 = MCP3002(channel=1, clock_pin=SCLK, mosi_pin=MOSI, miso_pin=MISO, select_pin=CS1)
-
+global serial
+global device
 serial = i2c(port=1, address=0x3c)
 device = ssd1306(serial)
 
-def controlcheck():
+def controlcheck(mode):
     packet = 0
+    global status
+    status = "DEFAULT"
     dataset = []
+    disarmnow, hovermode, manualmode, automode = mode
     if (sw0.is_pressed):
         packet = packet | 32
         dataset.append("Switch 0: ON")
@@ -84,25 +85,41 @@ def controlcheck():
     if (sw2.is_pressed):
         packet = packet | 128 
         dataset.append("SWITHC 2: ON")
-    if (pb0.is_pressed):
+    if (pb0.is_pressed): #MANUAL MODE
         dataset.append("PB0 : ON")
-        global manualmode = ~manualmode
-    if (pb1.is_pressed):
+        manualmode = 1
+        hovermode = 0
+        automode = 0
+    if (pb1.is_pressed): #EMERGENCY DISARM
         dataset.append("PB1 : ON")
-        global automode = ~automode
-    if (pb2.is_pressed):
+        disarmnow = 1
+        manualmode = 0
+        automode= 0
+        hovermode =0
+    if (pb2.is_pressed):#HOVER
         dataset.append("PB2: ON")
-        global hovermode = ~hovermode
-    if (pb3.is_pressed):
+        hovermode = 1
+        manualmode =0
+        automode = 0
+    if (pb3.is_pressed): #AUTO
         dataset.append("PB3: ON")
-        global disarmnow = ~disarmnow 
-    if (pb4.is_pressed):
+        automode = 1
+        hovermode = 0
+        manualmode = 0
+    if (pb4.is_pressed): #CLEARALL
         dataset.append("PB4: ON")
         packet = packet | 16
+        manualmode = 0
+        disarmnow = 0
+        automode = 0
+        hovermode = 0
+        led1.off()
+        led2.off()
+        led0.off()
+        status = "CLEAR"
 
-    global status = ""
-
-
+    print(disarmnow, hovermode, manualmode, automode)
+    print(dataset)
     if (disarmnow == True):
         status = "DISARM" 
         packet = packet | 0x1F
@@ -131,44 +148,67 @@ def controlcheck():
     #print(dataset)
    # print(packet)
     dataset.clear()
-    x1u = int(round(x1.value, sens) * 1024) #percentage of 1024, can decrease granularity here 
+    x1u = int(round(x1.value, sens) * 1023) #percentage of 1024, can decrease granularity here  
     x1u = x1u & bitmask #truncate bits  
     packet = packet | (x1u << (X1)) 
-    x2u = int(round(x2.value, sens) * 1024)
+    x2u = int(round(x2.value, sens) * 1023)
     x2u = x2u & bitmask
     packet = packet | (x2u << (X2))
-    y1u = int(round(y1.value, sens) * 1024)
+    y1u = int(round(y1.value, sens) * 1023)
     y1u = (y1u & bitmask)
     packet = packet | (y1u << (Y1))
-    y2u = int(round(y2.value, sens) * 1024)
+    y2u = int(round(y2.value, sens) * 1023)
     y2u = y2u & bitmask
     packet = packet | (y2u << (Y2))
     packet = int(packet)
-    
-    return (packet, status)
+    print(x1u, x2u, y1u, y2u)
+    mode = [disarmnow,hovermode, manualmode, automode] 
+    return (packet, status, mode)
+
+def waitfordata(s, timeout, sel):
+    success = "No Conn"
+    event = sel.select(timeout)
+    try:
+        for key, mask in event:
+            if key.fileobj == s:
+                data, addr = sock.recvfrom(100)
+                success = data.decode()
+    except KeyboardInterrupt:
+        pass
+    return success
 
 def control():
+    disarmnow = 0
+    hovermode = 0 
+    automode = 0  
+    manualmode = 0 
+    modes = [disarmnow, hovermode, automode, manualmode]
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    draw = canvas(device)
+    sel = selectors.DefaultSelector()
+    sel.register(s, selectors.EVENT_READ)
+    global status
     while (1):
-        packet, status = controlcheck()
+        packet, status, modes = controlcheck(modes)
+        print(status)
         packet = packet.to_bytes(16)
         try: 
             s.sendto(packet, (HOST, PORT2))
-            print("SEND SUCCESS")
+            connstatus = waitfordata(s, 0.0005, sel)
+            
         except:
-            status = "no connection"
+            connstatus = "no connection"
             pass
-        lcd(status, draw)
 
-def lcd(status, draw):
-    x = 2
+        lcd(status, connstatus)
+
+def lcd(status, connstatus):
+    x = 2 
     y = 15
-    
-    draw.rectangle(device.bounding_box, outline="white", fill="black")
-    font = ImageFont.trutype("font.ttf", 14)
-    draw.text((x,y), status, fill = "white", font = font)
-
+    y2 = 35
+    with canvas(device) as draw: 
+        font = ImageFont.truetype("font.ttf", 14)
+        draw.text((x,y), "ctrl: " + status, fill = "white", font = font)
+        draw.text((x,y2), "drone: " + connstatus, fill = "white", font=font)
 
 if __name__ == "__main__":
     try:
