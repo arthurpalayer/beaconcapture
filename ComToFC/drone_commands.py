@@ -48,18 +48,7 @@ def control():
 			except: 
 				time.sleep(0.05)
 				print("no connection")
-				pass
-	   
-		msg = "conn established"
-		msgfall = "falling"
-		msguser = "user mode"
-		msgauto = "automode"
-		msgoff = "user off"	
-		msg = msg.encode('utf-8')
-		msgoff = msgoff.encode('utf-8')
-		msgfall = msgfall.encode('utf-8')
-		msgauto = msgauto.encode()
-		msguser = msguser.encode()
+                pass
 
 		board.enable_arm()          #enable arming
 		board.arm()              #arm the board
@@ -67,18 +56,23 @@ def control():
 		try: 
 			while 1:
 				data, addr = s.recvfrom(BUFFSIZE)
-				data = int.from_bytes(data)
-				s.sendto(msg, addr)
+                data = int.from_bytes(data)
 				converted_data = packetconvert(data)
-				if(converted_data[0] != 0):
-					print("falling")
-				#	landing(board)
+
+
+
+                #converted data[0] encoding scheme:
+                #                     0x1F = disarm
+                #                     0x1 = Manual
+                #                     0x2 = AUTO
+                #                     0x4 = HOVER
+                #
+				if(converted_data[0] == 0xF):
 					board.disarm()
-					board.disable_arm()
-					s.sendto(msgfall, addr)
+                    board.disable_arm()
 					break
-				elif converted_data[1][2]:
-					s.sendto(msguser, addr)
+				elif (converted_data[0] == 0x1):
+
 					rudder = converted_data[2] / 1024           #left x axis
 					throttle = converted_data[4] / 1024         #left y axis
 					aileron = converted_data[3] / 1024          #right x axis
@@ -96,17 +90,16 @@ def control():
 					push16(buf, 1000)		                        # aux4
 					board.sendCMD(MultiWii.SET_RAW_RC, buf)
 
-				elif(not converted_data[1][2]):
-					s.sendto(msgoff, addr)
+				elif(not converted_data[0] == 0x2):
 					print("Manual control off")
 					low_motor(board, 1500)
-
+                
 
 		except KeyboardInterrupt:
 #			landing(board)
 			board.disarm()          #disarm the board
 			board.disable_arm()
-	return	
+	return
 
 def testswitch():
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:

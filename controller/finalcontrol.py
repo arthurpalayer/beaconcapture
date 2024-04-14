@@ -48,72 +48,87 @@ VIDBUFFSIZE = 1000000
 VIDPORT = 6967
 global sens
 sens = 3
+global sw0, sw1, sw2, pb0, pb1, pb2, pb3, pb4  
+global manualmode, automode, hovermode, disarmnow
+manualmode = False
+automode = False
+hovermode = False
+disarmnow = False
 
-def setupcontrol():
-    #copy paste control code here
-    global sw0 
-    sw0 = Button(SW0, pull_up=None, active_state=True)
-    global sw1 
-    sw1 = Button(SW1, pull_up=None, active_state=True)
-    global sw2 
-    sw2 = Button(SW2, pull_up=None, active_state=True)
-    global pb0 
-    pb0 = Button(PB0, pull_up=None, active_state=True)
-    global    pb1 
-    pb1 = Button(PB1, pull_up=None, active_state=True)
-    global pb2 
-    pb2 = Button(PB2, pull_up=None, active_state=True)
-    global pb3 
-    pb3 = Button(PB3, pull_up=None, active_state=True)
-    global pb4 
-    pb4 = Button(PB4, pull_up=None, active_state=True)
-    global led0
-    led0= LED(LED0)
-    global led1
-    led1 = LED(LED1)
-    global led2
-    led2= LED(LED2)
+sw0 = Button(SW0, pull_up=None, active_state=True)
+sw1 = Button(SW1, pull_up=None, active_state=True)
+sw2 = Button(SW2, pull_up=None, active_state=True)
+pb0 = Button(PB0, pull_up=None, active_state=True)
+pb1 = Button(PB1, pull_up=None, active_state=True)
+pb2 = Button(PB2, pull_up=None, active_state=True)
+pb3 = Button(PB3, pull_up=None, active_state=True)
+pb4 = Button(PB4, pull_up=None, active_state=True)
+led0 = LED(LED0)
+led1 = LED(LED1)
+led2 = LED(LED2)
+x1 = MCP3002(channel=0, clock_pin=SCLK, mosi_pin=MOSI, miso_pin=MISO, select_pin=CS0)
+x2 = MCP3002(channel=0, clock_pin=SCLK, mosi_pin=MOSI, miso_pin=MISO, select_pin=CS1)
+y1 = MCP3002(channel=1, clock_pin=SCLK, mosi_pin=MOSI, miso_pin=MISO, select_pin=CS0)
+y2 = MCP3002(channel=1, clock_pin=SCLK, mosi_pin=MOSI, miso_pin=MISO, select_pin=CS1)
 
-    global x1
-    x1 = MCP3002(channel=0, clock_pin=SCLK, mosi_pin=MOSI, miso_pin=MISO, select_pin=CS0)
-    global x2
-    x2= MCP3002(channel=0, clock_pin=SCLK, mosi_pin=MOSI, miso_pin=MISO, select_pin=CS1)
-    global y1
-    y1 = MCP3002(channel=1, clock_pin=SCLK, mosi_pin=MOSI, miso_pin=MISO, select_pin=CS0)
-    global y2
-    y2= MCP3002(channel=1, clock_pin=SCLK, mosi_pin=MOSI, miso_pin=MISO, select_pin=CS1)
+serial = i2c(port=1, address=0x3c)
+device = ssd1306(serial)
 
 def controlcheck():
-
+    status = ""
     packet = 0
     dataset = []
     if (sw0.is_pressed):
-      # print("PACKETYAY")
         packet = packet | 32
         dataset.append("Switch 0: ON")
     if(sw1.is_pressed):
         packet = packet | 64
-        led1.on()
         dataset.append("SWITCH 1: ON")
     if (sw2.is_pressed):
-        dataset.append("SWITHC 2: ON")
-        led2.on()
         packet = packet | 128 
+        dataset.append("SWITHC 2: ON")
     if (pb0.is_pressed):
         dataset.append("PB0 : ON")
-        packet = packet | 1
+        manualmode = ~manualmode
     if (pb1.is_pressed):
         dataset.append("PB1 : ON")
-        packet = packet | 2
+        automode = ~automode
     if (pb2.is_pressed):
         dataset.append("PB2: ON")
-        packet = packet | 4
+        hovermode = ~hovermode
     if (pb3.is_pressed):
         dataset.append("PB3: ON")
-        packet = packet | 8
+        disarmnow = ~disarmnow 
     if (pb4.is_pressed):
         dataset.append("PB4: ON")
         packet = packet | 16
+
+
+    if (disarmnow == True):
+        status = "DISARM" 
+        packet = packet | 0x1F
+        led0.on()
+        led1.on()
+        led2.on()
+    elif (manualmode == True):
+        status = "MANUAL MODE"
+        packet = packet | 0x1
+        led0.on()
+        led1.off()
+        led2.off()
+    elif (automode == True):
+        status = "AUTO MODE"
+        packet = packet | 0x2
+        led0.off()
+        led1.on()
+        led2.off()
+    elif (hovermode == True):
+        status = "HOVER MODE"
+        packet = packet | 0x4
+        led0.off()
+        led1.off()
+        led2.on() 
+ 
     #print(dataset)
    # print(packet)
     dataset.clear()
@@ -131,65 +146,46 @@ def controlcheck():
     packet = packet | (y2u << (Y2))
     packet = int(packet)
     
-    return packet
+    return (packet, status)
 
 def control():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     setupcontrol()
-    timeset = 0.005
+    draw = canvas(device)
     while (1):
-        packet = controlcheck()
-        #        packet = struct.pack('!I', aint) 
+        packet, status = controlcheck()
         packet = packet.to_bytes(16)
-    
         try: 
             s.sendto(packet, (HOST, PORT2))
-            print("send success")
+            print("SEND SUCCESS")
         except:
-            print("no connection")
+            status = "no connection"
             pass
-        try:
-            data, addr = s.recvfrom(20)
-            data = data.decode()
-            print(data)
-        except:
-            print("no msg")
-            pass
+        lcd(status, draw)
 
-def lcd():
-    serial = i2c(port=1, address=0x3c)
-    device = ssd1306(serial)
+def lcd(status, draw):
     x = 2
     y = 15
-    with canvas(device) as draw:
-        while 1: 
-            draw.rectangle(device.bounding_box, outline="white", fill="black")
-            if (pb0.is_pressed()):
-                status = "LANDING"
-            elif (sw2.is_pressed() & sw0.is_pressed == False):
-                status = "MANUAL MODE"
-            elif (sw2.is_pressed() & sw0.is_pressed()):
-                status = "AUTO MODE"
-            elif (sw2.is_pressed() == False):
-                status = "HOVER MODE"
-            else:
-                status = "INITIATING"
-            font = ImageFont.trutype("font.ttf", 14)
-            draw.text((x,y), status, fill = "white", font = font)
-            sleep(0.05)
+    
+    draw.rectangle(device.bounding_box, outline="white", fill="black")
+    font = ImageFont.trutype("font.ttf", 14)
+    draw.text((x,y), status, fill = "white", font = font)
 
-def donothing():
-    time.sleep(0.2)
 
 if __name__ == "__main__":
-    t1 = thread.Thread(target=control)
-#    t2 = thread.Thread(target=video.videorecv)
-#    t3 = thread.Thread(target=lcd) 
-    t1.start()
-#    t3.start()
-#    t2.start()
-    t1.join()
-#    t2.join()
-#    t3.join()
+    try:
+        while True:
+            t1 = thread.Thread(target=control)
+            t2 = thread.Thread(target=video.videorecv)
+            t1.start()
+            t2.start()
+            t1.join()
+            t2.join()
+    except KeyboardInterrupt:
+        pass
+
+
+    time.sleep(1)
+
 
 
