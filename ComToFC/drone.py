@@ -49,16 +49,27 @@ def packetconvert(packet):
     bitmask5 = 0x1F 
     bitmask3 = 0x7
     bitmask1 = 0x1
+
     usermode = False
     automode = False
     disarmnow = False
     hovermode = False
-
 #    print(bindata)
  #   print(type(bindata))
     data = [0,[0,0,0], 0, 0, 0, 0, 0]
     #data[0] = [bindata & 1, bindata & 2, bindata & 4, bindata & 8, bindata & 16] #pb0 - ph4
     data[0] = bindata & 0x1F
+    if (data[0] == 0x1):
+        msg = "MANUAL"
+    elif (data[1] == 0x2):
+        msg = "AUTO"
+    elif (data[0] == 0x4):
+        msg = "HOVER"
+    elif (data[0] >= 0xF):
+        msg = "DISARMING"
+    else:
+        msg = "UNKNOWN"
+
     print(data[0])
     print(bindata)
     data[1] = [bindata & 32, bindata & 64, bindata & 128]#switches
@@ -70,7 +81,7 @@ def packetconvert(packet):
     
     #print(bindata)
 
-    return data
+    return data, msg
 
 def send_command(data, board): 
     rudder = converted_data[2] / 1023           #left x axis

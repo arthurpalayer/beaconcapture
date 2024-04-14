@@ -57,7 +57,8 @@ def control():
 			while 1:
 				data, addr = s.recvfrom(BUFFSIZE)
 				data = int.from_bytes(data)
-				converted_data = packetconvert(data)
+				converted_data, msg = packetconvert(data)
+                s.sendto(addr, msg.encode())
 
 
 
@@ -67,7 +68,7 @@ def control():
 				#                     0x2 = AUTO
 				#                     0x4 = HOVER
 				#
-				if(converted_data[0] == 0xF):
+				if(converted_data[0] >= 0xF):
 					board.disarm()
 					board.disable_arm()
 					break
@@ -90,10 +91,10 @@ def control():
 					push16(buf, 1000)		                        # aux4
 					board.sendCMD(MultiWii.SET_RAW_RC, buf)
 
-				elif(not converted_data[0] == 0x2):
+				elif(converted_data[0] == 0x2 | converted_data[0] == 0x4):
 					print("Manual control off")
 					low_motor(board, 1500)
-				
+			    	
 
 		except KeyboardInterrupt:
 #			landing(board)
