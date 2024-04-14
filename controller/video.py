@@ -5,7 +5,8 @@ import pickle
 import socket
 from time import sleep
 
-HOST = '127.0.0.1'
+HOST = '10.42.0.1'
+#HOST = '127.0.0.1'
 VIDPORT = 6967
 VIDBUFFSIZE = 100000
 PACKETSIZE = 8
@@ -27,7 +28,7 @@ def videoserver():
     cam.start(show_preview=True)
     while 1:
         im = cam.capture_array()
-        ret, buffer = cv2.imencode(".jpg", im, [int(cv2.IMWRITE_JPEG_QUALITY), 30])
+        ret, buffer = cv2.imencode(".png", im, [int(cv2.IMWRITE_JPEG_QUALITY), 30])
         x = pickle.dumps(buffer)
         s.sendto(x, addr)
 
@@ -37,7 +38,7 @@ def videorecv():
     while 1:
         data, addr = s.recvfrom(VIDBUFFSIZE)
         data = pickle.loads(data)
-        data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+        data = cv2.imdecode(data, 1)
         cv2.imshow("LIVEFEED", data)
 
 
