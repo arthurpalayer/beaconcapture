@@ -1,4 +1,5 @@
 from drone import packetconvert
+from util import push16
 import time 
 import video
 import socket
@@ -21,7 +22,6 @@ def control():
 			except: 
 				time.sleep(0.05)
 				print("no connection")
-                pass
 
         print("arming")		
 		try: 
@@ -47,7 +47,11 @@ def control():
 					aileron = converted_data[3] / 1024          #right x axis
 					elevator = converted_data[5] / 1024         #right y axis
 					print(rudder, throttle, elevator, aileron)
-
+                    push16(buf, rudder * 1000 + 1000)
+                    push16(buf, throttle * 1000 + 1000)
+                    push16(buf, aileron * 1000 + 1000)
+                    push16(buf, elevator * 1000 + 1000)
+                    print(buf)
 				elif(not converted_data[0] == 0x2):
 					print("Manual control off")
                 
@@ -67,7 +71,7 @@ def testswitch():
             print(converted_data[1])
 
 if __name__ == "__main__":
-    if (1 == 1):
+    if (1 == 0):
         t1 = thread.Thread(target=control)
         t2 = thread.Thread(target=video.videoserver)
         t1.start()
