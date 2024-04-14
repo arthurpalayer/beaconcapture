@@ -19,7 +19,7 @@ Y1 = 28
 X2 = 18
 Y2 = 8
 SW = 5
-PB = 0
+PB = 1
 bitmask10 = 0x03FF
 bitmask = (bitmask10)
 PB0 = 14
@@ -46,10 +46,8 @@ PORT1 = 6969
 PORT2 = 6969
 VIDBUFFSIZE = 1000000
 VIDPORT = 6967
-global sens
+
 sens = 3
-global sw0, sw1, sw2, pb0, pb1, pb2, pb3, pb4  
-global manualmode, automode, hovermode, disarmnow
 manualmode = False
 automode = False
 hovermode = False
@@ -75,7 +73,6 @@ serial = i2c(port=1, address=0x3c)
 device = ssd1306(serial)
 
 def controlcheck():
-    status = ""
     packet = 0
     dataset = []
     if (sw0.is_pressed):
@@ -89,19 +86,21 @@ def controlcheck():
         dataset.append("SWITHC 2: ON")
     if (pb0.is_pressed):
         dataset.append("PB0 : ON")
-        manualmode = ~manualmode
+        global manualmode = ~manualmode
     if (pb1.is_pressed):
         dataset.append("PB1 : ON")
-        automode = ~automode
+        global automode = ~automode
     if (pb2.is_pressed):
         dataset.append("PB2: ON")
-        hovermode = ~hovermode
+        global hovermode = ~hovermode
     if (pb3.is_pressed):
         dataset.append("PB3: ON")
-        disarmnow = ~disarmnow 
+        global disarmnow = ~disarmnow 
     if (pb4.is_pressed):
         dataset.append("PB4: ON")
         packet = packet | 16
+
+    global status = ""
 
 
     if (disarmnow == True):
@@ -150,7 +149,6 @@ def controlcheck():
 
 def control():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    setupcontrol()
     draw = canvas(device)
     while (1):
         packet, status = controlcheck()
@@ -174,13 +172,15 @@ def lcd(status, draw):
 
 if __name__ == "__main__":
     try:
-        while True:
+        if (0 == 1):
             t1 = thread.Thread(target=control)
             t2 = thread.Thread(target=video.videorecv)
             t1.start()
             t2.start()
             t1.join()
             t2.join()
+        else:
+            control()
     except KeyboardInterrupt:
         pass
 
