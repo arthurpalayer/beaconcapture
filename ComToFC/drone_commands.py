@@ -28,13 +28,14 @@ def sendspeed(board, ail, elv, thr, rud):
 	push16(buf, int(ail * 1000) + 1000)
 	push16(buf, int(elv * 1000) + 1000)
 	push16(buf, int(thr * 1000) + 1000)
-	push16(buf, int(rud * 1000) + 1000)
+	push16(buf, int((rud) * 1000) + 1000)
 	push16(buf, 1500)
 	push16(buf, 1000)
 	push16(buf, 1000)
 	push16(buf, 1000)
 	board.sendCMD(MultiWii.SET_RAW_RC, buf)
 	print(buf)
+
 def landing(board):
 	for x in range(20):
 		buf = [] 
@@ -47,6 +48,7 @@ def landing(board):
 		push16(buf, 1000)
 		push16(buf, 1000)
 		board.sendCMD(MultiWii.SET_RAW_RC, buf)
+        time.sleep(0.025)
 
 def control():
 	with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
@@ -60,20 +62,18 @@ def control():
 				time.sleep(0.05)
 				print("no connection")
 				pass
+            
 		board = MultiWii("/dev/ttyACM0")
 		time.sleep(1.0)
 		board.enable_arm()          #enable arming
 		board.arm()              #arm the board
-		
+	    #MOTORS CANNOT STOP SPINNING	
 		try:	
 			buf = []
 			while 1:
 				data, addr = s.recvfrom(BUFFSIZE)
 				data = int.from_bytes(data)
 				converted_data, msg = packetconvert(data)
-				#s.sendto(msg.encode(), addr)
-
-
 
 				#converted data[0] encoding scheme:
 				#                     0x1F = disarm
@@ -84,28 +84,37 @@ def control():
 				if(converted_data[0] >= 0xF):
 					board.disarm()
 					board.disable_arm()
+                    msg = "DISARMING"
+                    s.sendto(msg.encode(), addr)
+                    landing(board)
+                    
 					break
 				elif (converted_data[0] == 0x1):
 					print("CONVERSION")
 
 					rudder = converted_data[4] / 1023           #left x axis
 					throttle = converted_data[2] / 1023   #left y axis
-					throttle = throttle * 0.75
+					throttle = throttle * 0.5
 					aileron = converted_data[3] / 1023         #right x axis
 					elevator = converted_data[5] / 1023         #right y axis
 					sendspeed(board, aileron, elevator, throttle, rudder)
+                    msg = "MANUAL"
 					time.sleep(0.025)
 
 
 
 				elif(converted_data[0] == 0x2 | converted_data[0] == 0x4):
 					print("Manual control off")
-					low_motor(board, 1000)
+				    sendspeed(board, 0.5, 0.5, 0.25, 0.5)	
+                    msg = "AUTOHOVER"
 					time.sleep(0.025)
 				else:
 					print("else")
-					sendspeed(board, 0, 0, 0, 0)
+					sendspeed(board, 0.5, 0.5, 0.25, 0.5)
+                    msg = "ELSE"
 					time.sleep(0.025)
+
+                s.sendto(msg.encode(), addr)
 
 		except KeyboardInterrupt:
 #			landing(board)
