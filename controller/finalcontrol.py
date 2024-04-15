@@ -1,4 +1,4 @@
-from numpy import uint64, uint32
+rom numpy import uint64, uint32
 import time
 from gpiozero import Button, LED, MCP3002
 import socket
@@ -11,6 +11,7 @@ from luma.oled.device import ssd1306
 from PIL import ImageFont
 import pickle
 import video
+import select
 import selectors
 #######64 bit packets 47:38 x1, 37:28 y1, 27:18 x2, 17:8 y2, 7:5 sw, 4:0 buttons
 
@@ -165,17 +166,18 @@ def controlcheck(mode):
     mode = [disarmnow,hovermode, manualmode, automode] 
     return (packet, status, mode)
 
-def waitfordata(s, timeout, sel):
-    success = "No Conn"
-    event = sel.select(timeout)
-    try:
-        for key, mask in event:
-            if key.fileobj == s:
-                data, addr = sock.recvfrom(100)
-                success = data.decode()
-    except KeyboardInterrupt:
-        pass
-    return success
+def waitfordata(s, timeout):
+
+    ready = select.select([s], [], [], timeout)
+    if ready[0]:
+        data, addr = sock.recvfrom(100)
+        print("received", data.decode())
+        msg = data.decode()
+    else:
+        print("timedout")
+        msg = "No Response"
+    
+    return msg
 
 def control():
     disarmnow = 0
@@ -184,8 +186,7 @@ def control():
     manualmode = 0 
     modes = [disarmnow, hovermode, automode, manualmode]
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sel = selectors.DefaultSelector()
-    sel.register(s, selectors.EVENT_READ)
+
     global status
     while (1):
         packet, status, modes = controlcheck(modes)
@@ -193,11 +194,12 @@ def control():
         packet = packet.to_bytes(16)
         try: 
             s.sendto(packet, (HOST, PORT2))
-            connstatus = waitfordata(s, 0.005, sel)
             
         except:
             connstatus = "no connection"
             pass
+        
+        connstatus = waitfordata(s, 0.025)
 
         lcd(status, connstatus)
 
@@ -226,6 +228,3 @@ if __name__ == "__main__":
 
 
     time.sleep(1)
-
-
-
