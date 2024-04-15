@@ -23,6 +23,18 @@ def low_motor(board, speed):
 	push16(buf, 1000)
 	board.sendCMD(MultiWii.SET_RAW_RC, buf)
 
+def sendspeed(board, ail, elv, thr, rud):
+	buf = []
+	push16(buf, int(ail * 1000) + 1000)
+	push16(buf, int(elv * 1000) + 1000)
+	push16(buf, int(thr * 1000) + 1000)
+	push16(buf, int(rud * 1000) + 1000)
+	push16(buf, 1500)
+	push16(buf, 1000)
+	push16(buf, 1000)
+	push16(buf, 1000)
+	board.sendCMD(MultiWii.SET_RAW_RC, buf)
+
 def landing(board):
 	for x in range(20):
 		buf = [] 
@@ -37,7 +49,6 @@ def landing(board):
 		board.sendCMD(MultiWii.SET_RAW_RC, buf)
 
 def control():
-	board = MultiWii("/dev/ttyACM0")
 	with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
 		flag = 1
 		while flag != 0:
@@ -49,17 +60,25 @@ def control():
 				time.sleep(0.05)
 				print("no connection")
 				pass
-
+		board = MultiWii("/dev/ttyACM0")
+		time.sleep(1.0)
 		board.enable_arm()          #enable arming
 		board.arm()              #arm the board
 		
-		try: 
+		try:	
+			buf = []
+			low_motor(board, 1500)
+			time.sleep(0.05)
+			low_motor(board,1500)
+			time.sleep(0.05)
+			print("low done")
 			while 1:
 				data, addr = s.recvfrom(BUFFSIZE)
 				data = int.from_bytes(data)
 				converted_data, msg = packetconvert(data)
-                s.sendto(addr, msg.encode())
+				s.sendto(msg.encode(), addr)
 
+				print(converted_data[0])
 
 
 				#converted data[0] encoding scheme:
@@ -72,29 +91,26 @@ def control():
 					board.disarm()
 					board.disable_arm()
 					break
-				elif (converted_data[0] == 0x1):
+				elif (converted_data[0] >= 0x1):
+					print("CONVERSION")
 
-					rudder = converted_data[2] / 1024           #left x axis
-					throttle = converted_data[4] / 1024         #left y axis
-					aileron = converted_data[3] / 1024          #right x axis
-					elevator = converted_data[5] / 1024         #right y axis
+					rudder = converted_data[2] / 1023           #left x axis
+					throttle = converted_data[4] / 1023         #left y axis
+					aileron = converted_data[3] / 1023         #right x axis
+					elevator = converted_data[5] / 1023         #right y axis
+					sendspeed(board, aileron, elevator, throttle, rudder)
+					time.sleep(0.020)
 
-					print(rudder, throttle, elevator, aileron)
-					buf = []
-					push16(buf, int(aileron * 1000 + 1000))		    # aileron
-					push16(buf, int(elevator * 1000 + 1000))	    # elevator
-					push16(buf, int(throttle * 1000 + 1000))	    # throttle
-					push16(buf, int(rudder * 1000 + 1000))		    # rudder
-					push16(buf, 1500)		                        # aux1
-					push16(buf, 1000)		                        # aux2
-					push16(buf, 1000)		                        # aux3
-					push16(buf, 1000)		                        # aux4
-					board.sendCMD(MultiWii.SET_RAW_RC, buf)
+
 
 				elif(converted_data[0] == 0x2 | converted_data[0] == 0x4):
 					print("Manual control off")
 					low_motor(board, 1500)
-			    	
+				else:
+					print("else")
+					sendspeed(board, 0.50, 0.50, 0.50, 0.50 )
+					time.sleep(0.025)
+				time.sleep(0.025)
 
 		except KeyboardInterrupt:
 #			landing(board)

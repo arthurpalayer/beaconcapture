@@ -59,6 +59,7 @@ def packetconvert(packet):
     data = [0,[0,0,0], 0, 0, 0, 0, 0]
     #data[0] = [bindata & 1, bindata & 2, bindata & 4, bindata & 8, bindata & 16] #pb0 - ph4
     data[0] = bindata & 0x1F
+    msg = ""
     if (data[0] == 0x1):
         msg = "MANUAL"
     elif (data[1] == 0x2):
@@ -68,12 +69,9 @@ def packetconvert(packet):
     elif (data[0] >= 0xF):
         msg = "DISARMING"
     else:
-        msg = "UNKNOWN"
+        msg = "FOUND"
 
-    print(data[0])
-    print(bindata)
     data[1] = [bindata & 32, bindata & 64, bindata & 128]#switches
-    print(data[1])
     data[2] = (bindata & (bitmask10 << (X1))) >> X1 #x1
     data[3] = (bindata & (bitmask10 << (X2))) >> X2#x2
     data[4] = (bindata & (bitmask10 << (Y1))) >> Y1#y1
