@@ -34,7 +34,6 @@ def sendspeed(board, ail, elv, thr, rud):
 	push16(buf, 1000)
 	push16(buf, 1000)
 	board.sendCMD(MultiWii.SET_RAW_RC, buf)
-	print(buf)
 
 def landing(board):
 	for x in range(20):
@@ -82,11 +81,11 @@ def control():
 				#                     0x4 = HOVER
 				#
 				if(converted_data[0] >= 0xF):
-					board.disarm()
-					board.disable_arm()
                     msg = "DISARMING"
                     s.sendto(msg.encode(), addr)
                     landing(board)
+                    board.disarm()
+                    board.disable_arm()
                     
 					break
 				elif (converted_data[0] == 0x1):
@@ -99,7 +98,6 @@ def control():
 					elevator = converted_data[5] / 1023         #right y axis
 					sendspeed(board, aileron, elevator, throttle, rudder)
                     msg = "MANUAL"
-					time.sleep(0.025)
 
 
 
@@ -107,12 +105,10 @@ def control():
 					print("Manual control off")
 				    sendspeed(board, 0.5, 0.5, 0.25, 0.5)	
                     msg = "AUTOHOVER"
-					time.sleep(0.025)
 				else:
 					print("else")
 					sendspeed(board, 0.5, 0.5, 0.25, 0.5)
                     msg = "ELSE"
-					time.sleep(0.025)
 
                 s.sendto(msg.encode(), addr)
 
