@@ -48,7 +48,7 @@ def landing(board):
 		push16(buf, 1000)
 		push16(buf, 1000)
 		board.sendCMD(MultiWii.SET_RAW_RC, buf)
-        time.sleep(0.025)
+		time.sleep(0.025)
 
 def control():
 	with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
@@ -60,7 +60,7 @@ def control():
 				print("conection")
 			except: 
 				time.sleep(0.05)
-				print("no connection")
+				print("bind fail")
 				pass
             
 		board = MultiWii("/dev/ttyACM0")
@@ -84,9 +84,9 @@ def control():
 				if(converted_data[0] >= 0xF):
 					board.disarm()
 					board.disable_arm()
-                    msg = "DISARMING"
-                    s.sendto(msg.encode(), addr)
-                    landing(board)
+					msg = "DISARMING"
+					s.sendto(msg.encode(), addr)
+					landing(board)
                     
 					break
 				elif (converted_data[0] == 0x1):
@@ -98,23 +98,22 @@ def control():
 					aileron = converted_data[3] / 1023         #right x axis
 					elevator = converted_data[5] / 1023         #right y axis
 					sendspeed(board, aileron, elevator, throttle, rudder)
-                    msg = "MANUAL"
+					msg = "MANUAL"
 					time.sleep(0.025)
 
 
 
 				elif(converted_data[0] == 0x2 | converted_data[0] == 0x4):
 					print("Manual control off")
-				    sendspeed(board, 0.5, 0.5, 0.25, 0.5)	
-                    msg = "AUTOHOVER"
+					sendspeed(board, 0.5, 0.5, 0.25, 0.5)	
+					msg = "AUTOHOVER"
 					time.sleep(0.025)
 				else:
 					print("else")
 					sendspeed(board, 0.5, 0.5, 0.25, 0.5)
-                    msg = "ELSE"
+					msg = "ELSE"
 					time.sleep(0.025)
-
-                s.sendto(msg.encode(), addr)
+				s.sendto(msg.encode(), addr)
 
 		except KeyboardInterrupt:
 #			landing(board)
