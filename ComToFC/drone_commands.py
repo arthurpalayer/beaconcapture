@@ -34,7 +34,6 @@ def sendspeed(board, ail, elv, thr, rud):
 	push16(buf, 1000)
 	push16(buf, 1000)
 	board.sendCMD(MultiWii.SET_RAW_RC, buf)
-	print(buf)
 
 def landing(board):
 	for x in range(20):
@@ -82,38 +81,36 @@ def control():
 				#                     0x4 = HOVER
 				#
 				if(converted_data[0] >= 0xF):
-					board.disarm()
-					board.disable_arm()
 					msg = "DISARMING"
 					s.sendto(msg.encode(), addr)
 					landing(board)
-                    
+					board.disarm()
+					board.disable_arm()
+					msg = "DISARMED"
+					s.sendto(msg.encode(), addr)
 					break
 				elif (converted_data[0] == 0x1):
 					print("CONVERSION")
-
+					msg = "MANUAL"
+					sendto(msg.encode(), addr)
 					rudder = converted_data[4] / 1023           #left x axis
 					throttle = converted_data[2] / 1023   #left y axis
 					throttle = throttle * 0.5
 					aileron = converted_data[3] / 1023         #right x axis
 					elevator = converted_data[5] / 1023         #right y axis
 					sendspeed(board, aileron, elevator, throttle, rudder)
-					msg = "MANUAL"
-					time.sleep(0.025)
-
-
 
 				elif(converted_data[0] == 0x2 | converted_data[0] == 0x4):
 					print("Manual control off")
-					sendspeed(board, 0.5, 0.5, 0.25, 0.5)	
 					msg = "AUTOHOVER"
-					time.sleep(0.025)
+					s.sendto(msg.encode(), addr)
+					sendspeed(board, 0.5, 0.5, 0.25, 0.5)	
 				else:
 					print("else")
-					sendspeed(board, 0.5, 0.5, 0.25, 0.5)
 					msg = "ELSE"
-					time.sleep(0.025)
-				s.sendto(msg.encode(), addr)
+					s.sendto(msg.encode(), addr)
+					sendspeed(board, 0.5, 0.5, 0.25, 0.5)	
+
 
 		except KeyboardInterrupt:
 #			landing(board)
