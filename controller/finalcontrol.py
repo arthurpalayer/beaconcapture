@@ -193,7 +193,7 @@ def control():
         packet = packet.to_bytes(16)
         try: 
             s.sendto(packet, (HOST, PORT2))
-            connstatus = waitfordata(s, 0.0005, sel)
+            connstatus = waitfordata(s, 0.005, sel)
             
         except:
             connstatus = "no connection"
