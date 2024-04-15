@@ -67,11 +67,6 @@ def control():
 		
 		try:	
 			buf = []
-			low_motor(board, 1500)
-			time.sleep(0.05)
-			low_motor(board,1500)
-			time.sleep(0.05)
-			print("low done")
 			while 1:
 				data, addr = s.recvfrom(BUFFSIZE)
 				data = int.from_bytes(data)
@@ -105,10 +100,10 @@ def control():
 
 				elif(converted_data[0] == 0x2 | converted_data[0] == 0x4):
 					print("Manual control off")
-					low_motor(board, 1500)
+					low_motor(board, 1000)
 				else:
 					print("else")
-					sendspeed(board, 0.50, 0.50, 0.50, 0.50 )
+					sendspeed(board, 0, 0, 0, 0 )
 					time.sleep(0.025)
 				time.sleep(0.025)
 
