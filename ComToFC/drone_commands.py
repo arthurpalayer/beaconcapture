@@ -26,7 +26,7 @@ def low_motor(board, speed):
 def sendspeed(board, ail, elv, thr, rud):
     buf = []
     push16(buf, int((ail * 1000) + 1437.5))
-    thrust = (int((thr - 0.25) * 1000 + 1000))
+    thrust = (int((thr - 0.333) * 1000 + 1000))
     push16(buf, int(((elv * 1000) + 1437.5)))
     if (thrust < 1000):
         thrust = 1000
@@ -113,7 +113,7 @@ def control():
                     msg = "MANUAL"
                     s.sendto(msg.encode(), addr)
                     rudder = converted_data[4] / (1023 * 8)           #left x axis
-                    throttle = converted_data[2] / (1023 * 2)   #left y axis
+                    throttle = converted_data[2] / (1023 * 1.5)   #left y axis
                     aileron = converted_data[3] / (1023 * 8)         #right x axis
                     elevator = converted_data[5] /( 1023 * 8)        #right y axis
                     sendspeed(board, aileron, elevator, throttle, rudder)
@@ -147,12 +147,12 @@ def testswitch():
             print(converted_data[1])
 
 if __name__ == "__main__":
-    #	t1 = thread.Thread(target=control)
-    #t2 = thread.Thread(target=video.videoserver)
-#	t1.start()
-    #t2.start()
-#	t1.join()
-    #t2.join()
-    control()
-    time.sleep(5)
+    while 1:
+        control()
+    t1 = thread.Thread(target=control)
+    t2 = thread.Thread(target=video.videoserver)
+    t1.start()
+    t2.start()
+    t1.join()
+    t2.join()
 
