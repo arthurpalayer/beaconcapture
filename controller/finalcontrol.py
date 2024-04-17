@@ -170,7 +170,7 @@ def waitfordata(s, timeout):
 
     ready = select.select([s], [], [], timeout)
     if ready[0]:
-        data, addr = sock.recvfrom(100)
+        data, addr = sock.recvfrom(64)
         print("received", data.decode())
         msg = data.decode()
     else:
