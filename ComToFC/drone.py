@@ -66,7 +66,7 @@ def packetconvert(packet):
         msg = "AUTO"
     elif (data[0] == 0x4):
         msg = "HOVER"
-    elif (data[0] >= 0xF):
+    elif (data[0] == 0x1F):
         msg = "DISARMING"
     else:
         msg = "FOUND"
