@@ -25,10 +25,13 @@ def low_motor(board, speed):
 
 def sendspeed(board, ail, elv, thr, rud):
 	buf = []
-	push16(buf, int(ail * 1000) + 1000)
-	push16(buf, int(elv * 1000) + 1000)
-	push16(buf, int(thr * 1000) + 1000)
-	push16(buf, int((rud) * 1000) + 1000)
+	push16(buf, int(ail * 1000) + 1375)
+	push16(buf, int(elv * 1000) + 1375)
+    thrust = int((thr - 0.25) * 1000 + 1000)
+    if thrust < 1000:
+        thrust = 1000
+	push16(buf, thrust)
+	push16(buf, int((rud) * 1000) + 1375)
 	push16(buf, 1500)
 	push16(buf, 1000)
 	push16(buf, 1000)
@@ -47,7 +50,7 @@ def landing(board):
 		push16(buf, 1000)
 		push16(buf, 1000)
 		board.sendCMD(MultiWii.SET_RAW_RC, buf)
-        time.sleep(0.025)
+		time.sleep(0.025)
 
 def control():
 	with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
@@ -59,9 +62,18 @@ def control():
 				print("conection")
 			except: 
 				time.sleep(0.05)
-				print("no connection")
-				pass
-            
+				print("bind fail")
+				pass 
+        notarmed = 1 
+        while (notarmed):
+            data, addr = s.recvfrom(BUFFSIZE)
+            if (data & 32 != 0 | data & 128 != 0):
+                notarmed = 0
+            else:
+                notarmed = 1
+        msg = "ARMING"
+        msg = msg.encode()
+        s.sendto(msg, addr)
 		board = MultiWii("/dev/ttyACM0")
 		time.sleep(1.0)
 		board.enable_arm()          #enable arming
@@ -80,37 +92,36 @@ def control():
 				#                     0x2 = AUTO
 				#                     0x4 = HOVER
 				#
-				if(converted_data[0] >= 0xF):
-                    msg = "DISARMING"
-                    s.sendto(msg.encode(), addr)
-                    landing(board)
-                    board.disarm()
-                    board.disable_arm()
-                    
+				if(converted_data[0] == 0x1F):
+					msg = "DISARMING"
+					s.sendto(msg.encode(), addr)
+					landing(board)
+					board.disarm()
+					board.disable_arm()
+					msg = "DISARMED"
+					s.sendto(msg.encode(), addr)
 					break
 				elif (converted_data[0] == 0x1):
 					print("CONVERSION")
-
-					rudder = converted_data[4] / 1023           #left x axis
-					throttle = converted_data[2] / 1023   #left y axis
-					throttle = throttle * 0.5
-					aileron = converted_data[3] / 1023         #right x axis
-					elevator = converted_data[5] / 1023         #right y axis
+					msg = "MANUAL"
+					sendto(msg.encode(), addr)
+					rudder = converted_data[4] / (1023 * 4)           #left x axis
+					throttle = converted_data[2] / (1023 * 2)   #left y axis
+					aileron = converted_data[3] / (1023 * 4)         #right x axis
+					elevator = converted_data[5] /( 1023 * 4)        #right y axis
 					sendspeed(board, aileron, elevator, throttle, rudder)
-                    msg = "MANUAL"
-
-
 
 				elif(converted_data[0] == 0x2 | converted_data[0] == 0x4):
 					print("Manual control off")
-				    sendspeed(board, 0.5, 0.5, 0.25, 0.5)	
-                    msg = "AUTOHOVER"
+					msg = "AUTOHOVER"
+					s.sendto(msg.encode(), addr)
+					sendspeed(board, 0.5, 0.5, 0.25, 0.5)	
 				else:
 					print("else")
-					sendspeed(board, 0.5, 0.5, 0.25, 0.5)
-                    msg = "ELSE"
+					msg = "ELSE"
+					s.sendto(msg.encode(), addr)
+					sendspeed(board, 0.5, 0.5, 0.25, 0.5)	
 
-                s.sendto(msg.encode(), addr)
 
 		except KeyboardInterrupt:
 #			landing(board)
@@ -136,3 +147,5 @@ if __name__ == "__main__":
 #	t1.join()
 	#t2.join()
 	control()
+    time.sleep(5)
+
