@@ -22,9 +22,9 @@ def is_hexadecimal(s):
             return False
 
     return True
-def get_accel():
+def get_accel(host, port):
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-        s.bind((HOST2, PORT2))
+        s.bind((host, port))
 
         data = s.recvfrom(BUFFSIZE)
         packet = bytearray(data[0]).decode(encoding='utf-8', errors='strict') 

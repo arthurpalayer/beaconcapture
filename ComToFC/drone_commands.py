@@ -137,6 +137,7 @@ def control():
                     msg = "DISARMED"
                     s.sendto(msg.encode(), addr)
                     break
+
                 elif (converted_data[0] == 0x1):
                     print("CONVERSION")
                     msg = "MANUAL"
@@ -147,11 +148,19 @@ def control():
                     elevator = converted_data[5] /( 1023 * 4)        #right y axis
                     sendspeed(board, aileron, elevator, throttle, rudder)
 
-                elif(converted_data[0] == 0x2 | converted_data[0] == 0x4):
+                elif(converted_data[0] == 0x2 '''| converted_data[0] == 0x4'''):
                     print("Manual control off")
                     msg = "AUTOHOVER"
                     s.sendto(msg.encode(), addr)
-                    sendspeed(board, 0.5, 0.5, 0.25, 0.5)	
+                    sendspeed(board, 0.5, 0.5, 0.25, 0.5)
+
+                elif(converted_data[0] == 0x4):
+                    print("Autonomous mode on")
+                    msg = "AUTONOMOUS")
+                    s.sendto(msg.encode(), addr)
+                    accel = get_accel(HOST, IMU_PORT)
+                    auto(board, accel)
+
                 else:
                     print("else")
                     msg = "ELSE"
