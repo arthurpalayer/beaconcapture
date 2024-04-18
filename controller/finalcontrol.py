@@ -1,4 +1,3 @@
-rom numpy import uint64, uint32
 import time
 from gpiozero import Button, LED, MCP3002
 import socket
@@ -170,7 +169,7 @@ def waitfordata(s, timeout):
 
     ready = select.select([s], [], [], timeout)
     if ready[0]:
-        data, addr = sock.recvfrom(100)
+        data, addr = s.recvfrom(100)
         print("received", data.decode())
         msg = data.decode()
     else:
@@ -199,7 +198,7 @@ def control():
             connstatus = "no connection"
             pass
         
-        connstatus = waitfordata(s, 0.025)
+        connstatus = waitfordata(s, 0.0005)
 
         lcd(status, connstatus)
 
@@ -214,7 +213,7 @@ def lcd(status, connstatus):
 
 if __name__ == "__main__":
     try:
-        if (0 == 1):
+        if (1 == 0):
             t1 = thread.Thread(target=control)
             t2 = thread.Thread(target=video.videorecv)
             t1.start()
