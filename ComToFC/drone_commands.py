@@ -3,7 +3,7 @@ from util import push16
 from drone_server_example import get_accel
 import time 
 import threading as thread
-import networks as network
+import network
 
 HOST = "10.42.0.1"		#define Host
 PORT = 6969			#define port
@@ -11,7 +11,8 @@ IMU_PORT = 6970
 BUFFSIZE = 64			#define size of buffer
 HOSTSERV = "10.42.0.254"
 HOVER = 1250
-
+VIDEOPORT = 6967
+CONTROLPORT = 6969
 def low_motor(board, speed):
     buf = []
     push16(buf, speed)
@@ -64,8 +65,10 @@ def landing(board):
 def auto(board, accel):
     #elevator x axis
     #aileron y axis
-    x_accel = accel[0]
-    y-accel = accel[1]
+    x_accel = 0
+    y_accel = 0
+    #x_accel = accel[0]
+    #y-accel = accel[1]
     aileron = int(x_accel * 100) + 1500
     elevator = int(y_accel * 100) + 1500
 
@@ -135,7 +138,7 @@ def control():
                 elevator = converted_data[5] /( 1023 * 4)        #right y axis
                 sendspeed(board, aileron, elevator, throttle, rudder)
 
-            elif(converted_data[0] == 0x2 '''| converted_data[0] == 0x4'''):
+            elif(converted_data[0] == 0x2| converted_data[0] == 0x4):
                 print("Manual control off")
                 msg = "AUTOHOVER"
                 controlserver.s.sendto(msg.encode(), addr)
@@ -143,10 +146,10 @@ def control():
 
             elif(converted_data[0] == 0x4):
                 print("Autonomous mode on")
-                msg = "AUTONOMOUS")
+                msg = "AUTONOMOUS"
                 controlserver.s.sendto(msg.encode(), addr)
-                accel = get_accel(HOST, IMU_PORT)
-                auto(board, accel)
+                #accel = get_accel(HOST, IMU_PORT)
+                #auto(board, accel)
 
             else:
                 print("else")
