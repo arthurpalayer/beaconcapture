@@ -26,16 +26,19 @@ def low_motor(board, speed):
 def sendspeed(board, ail, elv, thr, rud):
     buf = []
     aileron = int(ail * 1000 + 1375)
-    print("AILERON:", aileron)
-    push16(buf, int(aileron))
+    rudder = int((rud * 1000) + 1250)
+    elevator = int((elv * 1000) + 1375)
     thrust = (int((thr - 0.5) * 1000 + 1000))
-    push16(buf, int(((elv * 1000) + 1375)))
-    print("ELV:", int(((elv * 1000) + 1375)))
+
     if (thrust < 1000):
         thrust = 1000
+
+    print("AIL: ",aileron, " RUDDER: ", rudder, " ELV: ", elevator, " THR: ", thrust)
+
+    push16(buf, int(aileron))
+    push16(buf, elevator)
     push16(buf, thrust)
-    push16(buf, int(((rud) * 1000) + 1250))
-    print("RUD:",int(((rud) * 1000) + 1375))
+    push16(buf, rudder)
     
     push16(buf, 1500)
     push16(buf, 1000)
