@@ -196,7 +196,7 @@ def lcd(status, connstatus):
 
 if __name__ == "__main__":
     try:
-        if (1 == 0):
+        if (1 == 1):
             t1 = thread.Thread(target=control)
             t2 = thread.Thread(target=video)
             t1.start()

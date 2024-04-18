@@ -1,10 +1,7 @@
 from msp import MultiWii
 from util import push16
-from drone import packetconvert
 from drone_server_example import get_accel
 import time 
-import video
-import socket
 import threading as thread
 import networks as network
 
@@ -83,10 +80,10 @@ def auto(board, accel):
     push16(buf, 1000)
 
 def control():
-    controlserver = server("control", HOST, CONTROLPORT)
+    controlserver = network.server("control", HOST, CONTROLPORT)
     controlserver.makeconn()
-    beaconserver = server("beacon", HOST, BEACONPORT)
-    beaconserver.makeconn()
+    #beaconserver = network.server("beacon", HOST, BEACONPORT)
+    #beaconserver.makeconn()
 
     notarmed = 1 
     msg = "READY"
@@ -164,9 +161,24 @@ def control():
         board.disable_arm()
     return
 
+def video():
+    videoserver = network.videoclient("camera", HOST, VIDEOPORT)
+    addr = videoserver.makeconn()
+    videoserver.sendvideo(addr)
 
 if __name__ == "__main__":
-    control()
+    try:
+        if (1 == 1):
+            t1 = thread.Thread(target=control)
+            t2 = thread.Thread(target=video)
+            t1.start()
+            t2.start()
+            t1.join()
+            t2.join()
+    except KeyboardInterrupt:
+        pass
+
+    #control()
     #t1 = thread.Thread(target=control)
     #t2 = thread.Thread(target=video.videoserver)
     #t1.start()
