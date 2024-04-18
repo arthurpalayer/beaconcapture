@@ -10,6 +10,7 @@ HOST = "10.42.0.1"		#define Host
 PORT = 6969			#define port
 BUFFSIZE = 64			#define size of buffer
 HOSTSERV = "10.42.0.254"
+HOVER = 1250
 
 def low_motor(board, speed):
     buf = []
@@ -59,6 +60,24 @@ def landing(board):
         push16(buf, 1000)
         board.sendCMD(MultiWii.SET_RAW_RC, buf)
         time.sleep(0.025)
+        
+def auto(board, accel):
+    #elevator x axis
+    #aileron y axis
+    x_accel = accel[0]
+    y-accel = accel[1]
+    aileron = int(x_accel * 100) + 1500
+    elevator = int(y_accel * 100) + 1500
+
+    buf = []
+    push16(buf, aileron)
+    push16(buf, elevator)
+    push16(buf, HOVER)
+    push16(buf, 1500)
+    push16(buf, 1500)
+    push16(buf, 1000)
+    push16(buf, 1000)
+    push16(buf, 1000)
 
 def control():
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
