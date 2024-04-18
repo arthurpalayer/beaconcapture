@@ -183,8 +183,9 @@ def video():
     videoclient = n.videoclient("video", '10.42.0.1', 6967)
     videoclient.makeconn()
     print("VIDEO CONN CHECK")
-    while (sw0.is_pressed()):
-        videoclient.playvideo()
+    while 1:
+        while (sw0.is_pressed):
+            videoclient.playvideo()
 
 def lcd(status, connstatus):
     x = 2 
