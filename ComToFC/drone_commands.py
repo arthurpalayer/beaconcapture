@@ -165,8 +165,8 @@ def control():
     return
 
 def video():
-    videoserver = network.videoclient("camera", HOST, VIDEOPORT)
-    addr = videoserver.makeconn()
+    videoserver = network.videoserver("camera", HOST, VIDEOPORT)
+    req, addr = videoserver.makeconn()
     videoserver.sendvideo(addr)
 
 if __name__ == "__main__":
