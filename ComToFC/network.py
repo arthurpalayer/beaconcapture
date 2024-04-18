@@ -12,7 +12,7 @@ BEACONBUFFSIZE = 64
 BUFFSIZE = 64
 PORT = 6969
 HOST = '127.0.0.1'
-
+VIDEOPORT = 6967
 
 class server():
     
