@@ -174,9 +174,9 @@ if __name__ == "__main__":
         if (1 == 1):
             t1 = thread.Thread(target=control)
             t2 = thread.Thread(target=video)
-            t1.start()
+            #t1.start()
             t2.start()
-            t1.join()
+            #t1.join()
             t2.join()
     except KeyboardInterrupt:
         pass
