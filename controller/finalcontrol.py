@@ -1,17 +1,12 @@
 import time
+import network as n
 from gpiozero import Button, LED, MCP3002
 import socket
-import numpy as np
 import threading as thread
-import cv2
 from luma.core.interface.serial import i2c
 from luma.core.render import canvas
 from luma.oled.device import ssd1306
 from PIL import ImageFont
-import pickle
-import video
-import select
-import selectors
 #######64 bit packets 47:38 x1, 37:28 y1, 27:18 x2, 17:8 y2, 7:5 sw, 4:0 buttons
 
 #SHAMTS
@@ -47,6 +42,7 @@ PORT1 = 6969
 PORT2 = 6969
 VIDBUFFSIZE = 1000000
 VIDPORT = 6967
+CONTROLLERPORT = 6969
 
 sens = 3
 
@@ -165,18 +161,6 @@ def controlcheck(mode):
     mode = [disarmnow,hovermode, manualmode, automode] 
     return (packet, status, mode)
 
-def waitfordata(s, timeout):
-
-    ready = select.select([s], [], [], timeout)
-    if ready[0]:
-        data, addr = s.recvfrom(100)
-        print("received", data.decode())
-        msg = data.decode()
-    else:
-        print("timedout")
-        msg = "No Response"
-    
-    return msg
 
 def control():
     disarmnow = 0
@@ -184,23 +168,22 @@ def control():
     automode = 0  
     manualmode = 0 
     modes = [disarmnow, hovermode, automode, manualmode]
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    controlclient = n.client("controller", ip=HOST, port=CONTROLLERPORT)
+    controlclient.makeconn()
 
     global status
     while (1):
         packet, status, modes = controlcheck(modes)
         print(status)
-        packet = packet.to_bytes(16)
-        try: 
-            s.sendto(packet, (HOST, PORT2))
-            
-        except:
-            connstatus = "no connection"
-            pass
-        
-        connstatus = waitfordata(s, 0.0005)
-
+        controlclient.sendcontrol(packet)
         lcd(status, connstatus)
+
+def video():
+    videoclient = n.videoclient()
+    videoclient.makeconn()
+    print("VIDEO CONN CHECK")
+    while (sw0.is_pressed()):
+        videoclient.playvideo()
 
 def lcd(status, connstatus):
     x = 2 
@@ -215,7 +198,7 @@ if __name__ == "__main__":
     try:
         if (1 == 0):
             t1 = thread.Thread(target=control)
-            t2 = thread.Thread(target=video.videorecv)
+            t2 = thread.Thread(target=video)
             t1.start()
             t2.start()
             t1.join()
