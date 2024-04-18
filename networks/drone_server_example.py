@@ -52,17 +52,12 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
                 conv_factor = 262.144 # @ +/- 125 dps
             else:
                 packet_type = "BAD"
+                data_type = "BAD"
+                conv_factor = 1
 
             #x_data = int(packet[4:8], 16)
             x_data = twos_complement(packet[4:8], 16) / conv_factor
             y_data = twos_complement(packet[8:12], 16) / conv_factor
             z_data = twos_complement(packet[12:16], 16) / conv_factor
 
-            print(packet_type + ": (" + str(x_data) + ", " + str(y_data) + ", " + str(z_data) + ") + " data_type + "\n")
-
-
-
-
-
-
-
+            print(packet_type + ": (" + str(x_data) + ", " + str(y_data) + ", " + str(z_data) + ") " + data_type + " \n")
