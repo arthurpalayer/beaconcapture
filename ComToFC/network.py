@@ -124,6 +124,7 @@ class videoserver(server):
     def sendvideo(self, addr):
         while 1:
             im = self.cam.capture_array()
+            im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
             ret, buffer = cv2.imencode(".jpg", im, [cv2.IMWRITE_JPEG_QUALITY, 30])
             x = buffer.tobytes()
             self.s.sendto(x, addr)
