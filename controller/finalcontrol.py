@@ -176,10 +176,11 @@ def control():
         packet, status, modes = controlcheck(modes)
         print(status)
         controlclient.sendcontrol(packet)
+        connstatus = "VLAID"
         lcd(status, connstatus)
 
 def video():
-    videoclient = n.videoclient()
+    videoclient = n.videoclient("video", '10.42.0.1', 6967)
     videoclient.makeconn()
     print("VIDEO CONN CHECK")
     while (sw0.is_pressed()):
