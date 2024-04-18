@@ -59,7 +59,20 @@ def control():
 			print("DISARMING DUE TO SIGINT")
 #			landing(board)
 	return
-
+def testpush16():
+    stat = 0.01
+    while 1:
+        buf = []
+        push16(buf, int(stat * 1000) + 1000)
+        push16(buf, int(stat * 900) + 1000)
+        push16(buf, int(stat * 800) + 1000)
+        push16(buf, int(stat * 700) + 1000)
+        push16(buf,int( stat * 600) + 1000)
+        push16(buf, 1500)
+        push16(buf, 1400)
+        stat = stat + 0.01
+        time.sleep(0.5)
+        print(buf)
 def testswitch():
 	with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
 		s.bind((HOST, PORT))
@@ -71,12 +84,5 @@ def testswitch():
 			print(converted_data[1])
 
 if __name__ == "__main__":
-	if (1 == 0):
-		t1 = thread.Thread(target=control)
-		t2 = thread.Thread(target=video.videoserver)
-		t1.start()
-		t2.start()
-		t1.join()
-		t2.join()
-	else:
-		control()
+	testpush16()
+		
