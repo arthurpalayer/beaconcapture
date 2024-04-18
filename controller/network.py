@@ -10,13 +10,13 @@ CONTROLLERBUFFSIZE = 16
 VIDEOBUFFSIZE = 32768
 BEACONBUFFSIZE = 64
 BUFFSIZE = 64
-PORT = 6969
+PORT= 6969
+E
 HOST = '127.0.0.1'
 VIDEOPORT = 6967
 
 
-class server():
-    
+class server():   
     def __init__(self, name = "server", ip = '127.0.0.1', port = 6969):
         self.name = name
         self.ip = ip
