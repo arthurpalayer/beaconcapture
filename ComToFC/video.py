@@ -5,8 +5,8 @@ import pickle
 import socket
 from time import sleep
 
-#HOST = '10.42.0.1'
-HOST = '127.0.0.1'
+HOST = '10.42.0.1'
+#HOST = '127.0.0.1'
 VIDPORT = 6967
 VIDBUFFSIZE = 100000
 PACKETSIZE = 8
@@ -24,9 +24,11 @@ def videoserver():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind((HOST, VIDPORT))
     addr = makeconn(s) #establish connection to get address to send video to
+    print("CONN MADE!!!")
     cam = Picamera2()
     cam.start(show_preview=True)
     while 1:
+        print("SENDING DATA")
         im = cam.capture_array()
         ret, buffer = cv2.imencode(".jpg", im, [int(cv2.IMWRITE_JPEG_QUALITY), 50])
         x = pickle.dumps(buffer)
