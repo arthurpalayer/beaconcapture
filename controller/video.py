@@ -37,7 +37,7 @@ def videorecv():
     sendconn(s)
     while 1:
         data, addr = s.recvfrom(VIDBUFFSIZE)
-        data = pickle.loads(data)
+        data = data.decode()
         data = cv2.imdecode(data, cv2.IMREAD_COLOR)
         cv2.imshow("LIVEFEED", data)
 
