@@ -80,6 +80,7 @@ def auto(board, accel):
 def control():
     controlserver = network.server("control", HOST, CONTROLPORT)
     controlserver.makeconn()
+    beaconserver = network.beaconserver("beacon", HOST, BEACONPORT)
     #beaconserver = network.server("beacon", HOST, BEACONPORT)
     #beaconserver.makeconn()
 
@@ -143,6 +144,7 @@ def control():
                 print("Autonomous mode on")
                 msg = "AUTONOMOUS"
                 controlserver.s.sendto(msg.encode(), addr)
+                xyz = beaconserver.getdata()
                 #accel = get_accel(HOST, IMU_PORT)
                 #auto(board, accel)
 
