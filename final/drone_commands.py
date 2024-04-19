@@ -59,7 +59,7 @@ def auto(board, accel):
     #elevator x axis
     #aileron y axis
     x_accel = accel[0]
-    y-accel = accel[1]
+    y_accel = accel[1]
     aileron = int(x_accel * 100) + 1500
     elevator = int(y_accel * 100) + 1500
 
@@ -103,7 +103,7 @@ def control():
     try:	
         buf = []
         while 1:
-            converted_data, addr = controlrecv(header.CONTROLBUFFSIZE, "TAKINGDATA")
+            converted_data, addr = controlserver.controlrecv(header.CONTROLBUFFSIZE, "TAKINGDATA")
             #converted data[0] encoding scheme:
             #                     0x1F = disarm
             #                     0x1 = Manual
@@ -165,11 +165,11 @@ def video():
 if __name__ == "__main__":
     try:
         if (1 == 1):
-            #t1 = thread.Thread(target=control)
+            t1 = thread.Thread(target=control)
             t2 = thread.Thread(target=video)
-            #t1.start()
+            t1.start()
             t2.start()
-            #t1.join()
+            t1.join()
             t2.join()
     except KeyboardInterrupt:
         pass
