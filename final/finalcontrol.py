@@ -37,7 +37,7 @@ CS1 = 7
 SCLK = 11
 
 
-#HOST = "127.0.0.1"
+#header.HOST = "127.0.0.1"
 sens = 3
 
 sw0 = Button(SW0, pull_up=None, active_state=True)
@@ -162,7 +162,7 @@ def control():
     automode = 0  
     manualmode = 0 
     modes = [disarmnow, hovermode, automode, manualmode]
-    controlclient = n.client("controller", ip=HOST, port=CONTROLPORT)
+    controlclient = n.client("controller", ip=header.HOST, port=header.CONTROLPORT)
     controlclient.makeconn()
 
     global status

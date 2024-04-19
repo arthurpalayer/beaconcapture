@@ -75,10 +75,10 @@ def auto(board, accel):
     push16(buf, 1000)
 
 def control():
-    controlserver = network.server("control", HOST, CONTROLPORT)
+    controlserver = network.server("control", header.HOST, header.CONTROLPORT)
     controlserver.makeconn()
-    beaconserver = network.beaconserver("beacon", HOST, BEACONPORT)
-    #beaconserver = network.server("beacon", HOST, BEACONPORT)
+    beaconserver = network.beaconserver("beacon", header.HOST, header.BEACONPORT)
+    #beaconserver = network.server("beacon", header.HOST, header.BEACONPORT)
     #beaconserver.makeconn()
 
     notarmed = 1 
@@ -104,7 +104,7 @@ def control():
     try:	
         buf = []
         while 1:
-            converted_data, addr = controlrecv(CONTROLBUFFSIZE, "TAKINGDATA")
+            converted_data, addr = controlrecv(header.CONTROLBUFFSIZE, "TAKINGDATA")
             #converted data[0] encoding scheme:
             #                     0x1F = disarm
             #                     0x1 = Manual
@@ -159,7 +159,7 @@ def control():
     return
 
 def video():
-    videoserver = network.videoserver("camera", HOST, VIDEOPORT)
+    videoserver = network.videoserver("camera", header.HOST, header.VIDEOPORT)
     req, addr = videoserver.makeconn()
     videoserver.sendvideo(addr)
 
