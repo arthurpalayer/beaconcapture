@@ -142,13 +142,13 @@ def control():
                 print("Manual control off")
                 msg = "AUTOHOVER"
                 controlserver.s.sendto(msg.encode(), addr)
-                sendspeed(board, 0.5, 0.5, 0.25, 0.5)
+                sendspeed(board, 0.125, 0.125, 0.25, 0.25)
 
             else:
                 print("else")
                 msg = "ELSE"
                 controlserver.s.sendto(msg.encode(), addr)
-                sendspeed(board, 0.5, 0.5, 0.25, 0.5)	
+                sendspeed(board, 0.125, 0.125, 0.25, 0.25)	
 
 
     except KeyboardInterrupt:
