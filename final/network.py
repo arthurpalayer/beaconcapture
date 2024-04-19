@@ -42,7 +42,7 @@ class server():
 
     def makeconn(self):
         #establish connection by receiving conn REQ and reply with ACK
-        req, addr = self.s.recvfrom(BUFFSIZE) #wait to recvfrom 
+        req, addr = self.s.recvfrom(header.CONTROLBUFFSIZE) #wait to recvfrom 
         msg = "ACK".encode()
         self.s.sendto(msg, addr) #send ACK #send 1
         print(self.name, " CONN CHECK")

@@ -1,7 +1,6 @@
 import header
 from msp import MultiWii
 from util import push16
-from drone_server_example import get_accel
 import time 
 import threading as thread
 import network
