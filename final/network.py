@@ -4,7 +4,7 @@ import cv2
 import select
 import pickle
 from time import sleep
-from drone import packetconvert
+from convert import packetconvert
 from picamera2 import Picamera2
 
 CONTROLLERBUFFSIZE = 16
@@ -98,8 +98,9 @@ class client():
         return ret
     
     def sendcontrol(self, packet):
-        packet = packet.to_bytes(CONTROLLERBUFFSIZE)
+        packet = packet.to_bytes(CONTROLBUFFSIZE)
         self.s.sendto(packet, (self.ip, self.port))
+        return self.waitfordata(0.0005)
 
                      
 

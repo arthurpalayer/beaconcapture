@@ -7,6 +7,7 @@ from luma.core.interface.serial import i2c
 from luma.core.render import canvas
 from luma.oled.device import ssd1306
 from PIL import ImageFont
+import header
 #######64 bit packets 47:38 x1, 37:28 y1, 27:18 x2, 17:8 y2, 7:5 sw, 4:0 buttons
 
 #SHAMTS
@@ -37,13 +38,6 @@ SCLK = 11
 
 
 #HOST = "127.0.0.1"
-HOST = "10.42.0.1"
-PORT1 = 6969
-PORT2 = 6969
-VIDBUFFSIZE = 1000000
-VIDPORT = 6967
-CONTROLLERPORT = 6969
-
 sens = 3
 
 sw0 = Button(SW0, pull_up=None, active_state=True)
@@ -168,15 +162,14 @@ def control():
     automode = 0  
     manualmode = 0 
     modes = [disarmnow, hovermode, automode, manualmode]
-    controlclient = n.client("controller", ip=HOST, port=CONTROLLERPORT)
+    controlclient = n.client("controller", ip=HOST, port=CONTROLPORT)
     controlclient.makeconn()
 
     global status
     while (1):
         packet, status, modes = controlcheck(modes)
         print(status)
-        controlclient.sendcontrol(packet)
-        connstatus = "VLAID"
+        connstatus = controlclient.sendcontrol(packet)
         lcd(status, connstatus)
 
 def video():

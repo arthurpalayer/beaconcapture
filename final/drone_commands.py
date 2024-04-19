@@ -1,3 +1,4 @@
+import header
 from msp import MultiWii
 from util import push16
 from drone_server_example import get_accel
@@ -5,15 +6,8 @@ import time
 import threading as thread
 import network
 
-HOST = "10.42.0.1"		#define Host
-PORT = 6969			#define port
-IMU_PORT = 6970
-BUFFSIZE = 64			#define size of buffer
-HOSTSERV = "10.42.0.254"
 HOVER = 1250
-VIDEOPORT = 6967
-BEACONPORT = 6968
-CONTROLPORT = 6969
+
 def low_motor(board, speed):
     buf = []
     push16(buf, speed)
