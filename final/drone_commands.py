@@ -4,7 +4,7 @@ from util import push16
 import time 
 import threading as thread
 import network
-
+from uwb import initialize_uwb, read_uwb
 
 def low_motor(board, speed):
     buf = []
@@ -162,15 +162,22 @@ def video():
     req, addr = videoserver.makeconn()
     videoserver.sendvideo(addr)
 
+def uwb():
+    read_uwb()
+
 if __name__ == "__main__":
     try:
+        intitialze_uwb()
         if (1 == 1):
             t1 = thread.Thread(target=control)
             t2 = thread.Thread(target=video)
+            t3 = thread.Thread(target=uwb)
             t1.start()
             t2.start()
+            t3.start()
             t1.join()
             t2.join()
+            t3.join()
     except KeyboardInterrupt:
         pass
 
