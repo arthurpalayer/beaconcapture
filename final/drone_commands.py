@@ -58,26 +58,39 @@ def landing(board):
 def auto(board, accel):
     #elevator x axis
     #aileron y axis
-
+    
     x_accel = accel[0]
     y_accel = accel[1]
-
+    aileron = int(x_accel * 1000) + 1500
+    elevator = int(y_accel * 1000) + 1500
+    if aileron < 1375:
+        aileron = 1375
+    if aileron > 1625:
+        aileron = 1625
+    if elevator < 1375:
+        elevator = 1375
+    if elevator > 1625:
+        elevator = 1625
+    '''
     if(thresh_dist < uwb.distance):
         aileron = int(x_accel * 100) + 1500
         elevator = int(y_accel * 100) + 1500
     else:
         aileron = 1500
         elevator = 1500
-
+    '''
+    print(aileron)
+    print(elevator)
     buf = []
     push16(buf, aileron)
     push16(buf, elevator)
-    push16(buf, HOVER)
+    push16(buf, 1250)
     push16(buf, 1500)
     push16(buf, 1500)
     push16(buf, 1000)
     push16(buf, 1000)
     push16(buf, 1000)
+    board.sendCMD(MultiWii.SET_RAW_RC, buf)
 
 def control():
     controlserver = network.server("control", header.HOST, header.CONTROLPORT)
@@ -138,13 +151,14 @@ def control():
                 sendspeed(board, aileron, elevator, throttle, rudder)
 
             elif(converted_data[0] == 0x2):
-                if(first_auto):
+                '''if(first_auto):
                     global dist_thresh = uwb.distance
-                    first_auto = 0
+                    first_auto = 0'''
                 print("Autonomous mode on")
                 msg = "AUTONOMOUS"
                 controlserver.s.sendto(msg.encode(), addr)
                 xyz = beaconserver.getdata()
+                print(xyz)
                 #accel = get_accel(HOST, IMU_PORT)
                 auto(board, xyz)
 
@@ -174,17 +188,17 @@ def video():
 
 if __name__ == "__main__":
     try:
-        uwb.intitialze_uwb()
+        #uwb.intitialze_uwb()
         if (1 == 1):
             t1 = thread.Thread(target=control)
             t2 = thread.Thread(target=video)
-            t3 = thread.Thread(target=uwb.read_uwb)
+            #t3 = thread.Thread(target=uwb.read_uwb)
             t1.start()
             t2.start()
-            t3.start()
+            #t3.start()
             t1.join()
             t2.join()
-            t3.join()
+            #t3.join()
     except KeyboardInterrupt:
         pass
 

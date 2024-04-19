@@ -121,7 +121,7 @@ class videoserver(server):
         while 1:
             im = self.cam.capture_array()
             im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
-            ret, buffer = cv2.imencode(".jpg", im, [cv2.IMWRITE_JPEG_QUALITY, 30])
+            ret, buffer = cv2.imencode(".jpg", im, [cv2.IMWRITE_JPEG_QUALITY, 50])
             x = buffer.tobytes()
             self.s.sendto(x, addr)
 
@@ -129,28 +129,31 @@ class beaconserver(server):
     def __init__(self, name="beacon", ip="10.42.0.1", port=header.BEACONPORT):
         super().__init__(name, ip, port)
 
-    def getdata(self):
-        data, addr = self.s.recvfrom(header.BEACONBUFFSIZE)
-        packet = bytearray(data).decode('utf-8', errors='strict')
-        conversion = 160563.2
-        x = twos_complement(packet[4:8], 16) / conversion
-        y = twos_complement(packet[8:12], 16) / conversion
-        z = twos_complement(packet[12:16], 16) / conversion
-        return [x,y,z]
-        
-
-    def twos_complement(hexstr, bits):
+    def twos_complement(self, hexstr, bits):
         value = int(hexstr, 16)
         if value & (1 << (bits - 1)):
             value -= 1 << bits
         return value
 
-    def is_hex(d):
+    def is_hex(self, d):
         for c in d:
             if c not in set('0123456789abcdefABCDEF'):
                 return False
-    
 
-
-
+    def getdata(self):
+        print("before getting data")
+#        data, addr = self.s.recvfrom(header.BEACONBUFFSIZE)
+        data = self.waitfordata(0.005)
+        if data == "Not Ready":
+            return [0, 0, 10]
+        else:
+            print("data got")
+            packet = bytearray(data)
+            conversion = 160563.2
+            x = self.twos_complement(packet[4:8], 16) / conversion
+            y = self.twos_complement(packet[8:12], 16) / conversion
+            z = self.twos_complement(packet[12:16], 16) / conversion
+            print(x, y, z , "in beaconserver")
+            return [x,y,z]
+        
 
