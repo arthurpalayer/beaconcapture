@@ -166,8 +166,8 @@ def control():
     return
 
 def video():
-    videoserver = network.videoclient("camera", HOST, VIDEOPORT)
-    addr = videoserver.makeconn()
+    videoserver = network.videoserver("camera", HOST, VIDEOPORT)
+    req, addr = videoserver.makeconn()
     videoserver.sendvideo(addr)
 
 if __name__ == "__main__":
@@ -175,9 +175,9 @@ if __name__ == "__main__":
         if (1 == 1):
             #t1 = thread.Thread(target=control)
             t2 = thread.Thread(target=video)
-            t1.start()
+            #t1.start()
             t2.start()
-            t1.join()
+            #t1.join()
             t2.join()
     except KeyboardInterrupt:
         pass

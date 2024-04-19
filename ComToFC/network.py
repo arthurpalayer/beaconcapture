@@ -5,7 +5,7 @@ import select
 import pickle
 from time import sleep
 from drone import packetconvert
-
+from picamera2 import Picamera2
 CONTROLLERBUFFSIZE = 16
 VIDEOBUFFSIZE = 32768
 BEACONBUFFSIZE = 64
@@ -118,12 +118,13 @@ class videoclient(client):
 class videoserver(server):
     def __init__(self, name="video", ip='10.42.0.1', port=VIDEOPORT):
         super().__init__(name, ip, port)
-        cam = Picamera2()
-        cam.start()
+        self.cam = Picamera2()
+        self.cam.start(show_preview=True)
 
     def sendvideo(self, addr):
         while 1:
-            im = cam.capture_array()
+            im = self.cam.capture_array()
+            im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
             ret, buffer = cv2.imencode(".jpg", im, [cv2.IMWRITE_JPEG_QUALITY, 30])
             x = buffer.tobytes()
             self.s.sendto(x, addr)

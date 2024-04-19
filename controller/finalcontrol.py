@@ -183,8 +183,9 @@ def video():
     videoclient = n.videoclient("video", '10.42.0.1', 6967)
     videoclient.makeconn()
     print("VIDEO CONN CHECK")
-    while (sw0.is_pressed()):
-        videoclient.playvideo()
+    while 1:
+        while (sw0.is_pressed):
+            videoclient.playvideo()
 
 def lcd(status, connstatus):
     x = 2 
@@ -200,9 +201,9 @@ if __name__ == "__main__":
         if (1 == 1):
             t1 = thread.Thread(target=control)
             t2 = thread.Thread(target=video)
-            t1.start()
+            #t1.start()
             t2.start()
-            t1.join()
+            #t1.join()
             t2.join()
         else:
             control()

@@ -7,16 +7,15 @@ from time import sleep
 from drone import packetconvert
 
 CONTROLLERBUFFSIZE = 16
-VIDEOBUFFSIZE = 32768
+VIDEOBUFFSIZE = 10000000 
 BEACONBUFFSIZE = 64
 BUFFSIZE = 64
-PORT = 6969
+PORT= 6969
 HOST = '127.0.0.1'
 VIDEOPORT = 6967
 
 
-class server():
-    
+class server():   
     def __init__(self, name = "server", ip = '127.0.0.1', port = 6969):
         self.name = name
         self.ip = ip
@@ -108,8 +107,8 @@ class videoclient(client):
     def __init__(self, name="video", ip='10.42.0.1', port=VIDEOPORT):
         super().__init__(name, ip, port) 
 
-    def playvideo():
-        data, addr = s.recvfrom(VIDEOBUFFSIZE)
+    def playvideo(self):
+        data, addr = self.s.recvfrom(VIDEOBUFFSIZE)
         data = np.frombuffer(data, np.uint8)
         data = cv2.imdecode(data, cv2.IMREAD_COLOR)
         cv2.imshow("LIVEFEED", data)
