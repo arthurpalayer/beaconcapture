@@ -12,6 +12,7 @@ BUFFSIZE = 64			#define size of buffer
 HOSTSERV = "10.42.0.254"
 HOVER = 1250
 VIDEOPORT = 6967
+BEACONPORT = 6968
 CONTROLPORT = 6969
 def low_motor(board, speed):
     buf = []
@@ -172,7 +173,7 @@ def video():
 if __name__ == "__main__":
     try:
         if (1 == 1):
-            t1 = thread.Thread(target=control)
+            #t1 = thread.Thread(target=control)
             t2 = thread.Thread(target=video)
             t1.start()
             t2.start()
