@@ -158,6 +158,7 @@ def controlcheck(mode):
 
 
 def control():
+    lcd("ON", "ON")
     disarmnow = 0
     hovermode = 0 
     automode = 0  
@@ -169,7 +170,6 @@ def control():
     global status
     while (1):
         packet, status, modes = controlcheck(modes)
-        print(status)
         connstatus = controlclient.sendcontrol(packet)
         lcd(status, connstatus)
 

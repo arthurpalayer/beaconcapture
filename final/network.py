@@ -51,7 +51,7 @@ class server():
     def controlrecv(self,buffersize=4096, msg = "CONTROL ACK"):
         data, addr = self.s.recvfrom(buffersize)
         data = int.from_bytes(data)
-        self.s.sendto(msg.encode(), addr)
+        #self.s.sendto(msg.encode(), addr)
         data, status = packetconvert(data)
         return data, addr
 
