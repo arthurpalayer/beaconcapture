@@ -103,8 +103,8 @@ class videoclient(client):
     def __init__(self, name="video", ip='10.42.0.1', port=header.VIDEOPORT):
         super().__init__(name, ip, port) 
 
-    def playvideo():
-        data, addr = s.recvfrom(header.VIDEOBUFFSIZE)
+    def playvideo(self):
+        data, addr = self.s.recvfrom(header.VIDEOBUFFSIZE)
         data = np.frombuffer(data, np.uint8)
         data = cv2.imdecode(data, cv2.IMREAD_COLOR)
         cv2.imshow("LIVEFEED", data)
@@ -115,7 +115,7 @@ class videoserver(server):
     def __init__(self, name="video", ip='10.42.0.1', port=header.VIDEOPORT):
         super().__init__(name, ip, port)
         self.cam = Picamera2()
-        self.cam.start(show_preview=True)
+        self.cam.start()
 
     def sendvideo(self, addr):
         while 1:
