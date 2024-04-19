@@ -1,6 +1,7 @@
 import time
 import network as n
 from gpiozero import Button, LED, MCP3002
+import cv2
 import socket
 import threading as thread
 from luma.core.interface.serial import i2c
@@ -177,8 +178,10 @@ def video():
     videoclient.makeconn()
     print("VIDEO CONN CHECK")
     while 1:
-        while (sw0.is_pressed):
+        if (sw0.is_pressed):
             videoclient.playvideo()
+        else:
+            cv2.destroyAllWindows()
 
 def lcd(status, connstatus):
     x = 2 
