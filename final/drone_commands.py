@@ -61,16 +61,16 @@ def auto(board, accel):
     
     x_accel = accel[0]
     y_accel = accel[1]
-    aileron = int(x_accel * 1000) + 1500
-    elevator = int(y_accel * 1000) + 1500
-    if aileron < 1375:
-        aileron = 1375
-    if aileron > 1625:
-        aileron = 1625
-    if elevator < 1375:
-        elevator = 1375
-    if elevator > 1625:
-        elevator = 1625
+    aileron = int(x_accel * 5000) + 1500
+    elevator = int(y_accel * 5000) + 1500
+    if aileron < 1200:
+        aileron = 1200
+    if aileron > 1800:
+        aileron = 1800
+    if elevator < 1200:
+        elevator = 1200
+    if elevator > 1800:
+        elevator = 1800
     '''
     if(thresh_dist < uwb.distance):
         aileron = int(x_accel * 100) + 1500
@@ -167,12 +167,14 @@ def control():
                 msg = "AUTOHOVER"
                 controlserver.s.sendto(msg.encode(), addr)
                 sendspeed(board, 0.125, 0.125, 0.25, 0.25)
+                time.sleep(0.05)
 
             else:
                 print("else")
                 msg = "ELSE"
                 controlserver.s.sendto(msg.encode(), addr)
                 sendspeed(board, 0.125, 0.125, 0.25, 0.25)	
+                time.sleep(0.05)
 
 
     except KeyboardInterrupt:

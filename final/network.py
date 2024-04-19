@@ -51,7 +51,7 @@ class server():
     def controlrecv(self,buffersize=4096, msg = "CONTROL ACK"):
         data, addr = self.s.recvfrom(buffersize)
         data = int.from_bytes(data)
-        #self.s.sendto(msg.encode(), addr)
+        self.s.sendto(msg.encode(), addr)
         data, status = packetconvert(data)
         return data, addr
 
@@ -94,7 +94,7 @@ class client():
     def sendcontrol(self, packet):
         packet = packet.to_bytes(header.CONTROLBUFFSIZE)
         self.s.sendto(packet, (self.ip, self.port))
-        return self.waitfordata(0.0005)
+        return self.waitfordata(0.00005)
 
                      
 
@@ -144,11 +144,12 @@ class beaconserver(server):
         print("before getting data")
 #        data, addr = self.s.recvfrom(header.BEACONBUFFSIZE)
         data = self.waitfordata(0.005)
+        data = data.encode('utf-8')
         if data == "Not Ready":
             return [0, 0, 10]
         else:
             print("data got")
-            packet = bytearray(data)
+            packet = bytearray(data).decode('utf-8')
             conversion = 160563.2
             x = self.twos_complement(packet[4:8], 16) / conversion
             y = self.twos_complement(packet[8:12], 16) / conversion
