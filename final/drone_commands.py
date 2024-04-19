@@ -58,10 +58,16 @@ def landing(board):
 def auto(board, accel):
     #elevator x axis
     #aileron y axis
+
     x_accel = accel[0]
     y_accel = accel[1]
-    aileron = int(x_accel * 100) + 1500
-    elevator = int(y_accel * 100) + 1500
+
+    if(thresh_dist < uwb.distance):
+        aileron = int(x_accel * 100) + 1500
+        elevator = int(y_accel * 100) + 1500
+    else:
+        aileron = 1500
+        elevator = 1500
 
     buf = []
     push16(buf, aileron)
@@ -80,7 +86,8 @@ def control():
     #beaconserver = network.server("beacon", header.HOST, header.BEACONPORT)
     #beaconserver.makeconn()
 
-    notarmed = 1 
+    notarmed = 1
+    first_auto = 1
     msg = "READY"
     msg = msg.encode()
 
@@ -131,6 +138,9 @@ def control():
                 sendspeed(board, aileron, elevator, throttle, rudder)
 
             elif(converted_data[0] == 0x2):
+                if(first_auto):
+                    global dist_thresh = uwb.distance
+                    first_auto = 0
                 print("Autonomous mode on")
                 msg = "AUTONOMOUS"
                 controlserver.s.sendto(msg.encode(), addr)
