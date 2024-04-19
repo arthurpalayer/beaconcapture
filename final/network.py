@@ -131,12 +131,32 @@ class videoserver(server):
             x = buffer.tobytes()
             self.s.sendto(x, addr)
 
-class beaconclient(client):
+class beaconserver(server):
     def __init__(self, name="beacon", ip="10.42.0.1", port=BEACONPORT):
         super().__init__(name, ip, port)
 
-    def getdata():
-        self.s.recvfrom(BEACONBUFFSIZE)
+    def getdata(self):
+        data, addr = self.s.recvfrom(BEACONBUFFSIZE)
+        packet = bytearray(data).decode('utf-8', errors='strict')
+        conversion = 160563.2
+        x = twos_complement(packet[4:8], 16) / conversion
+        y = twos_complement(packet[8:12], 16) / conversion
+        z = twos_complement(packet[12:16], 16) / conversion
+        return [x,y,z]
+        
+
+    def twos_complement(hexstr, bits):
+        value = int(hexstr, 16)
+        if value & (1 << (bits - 1)):
+            value -= 1 << bits
+        return value
+
+    def is_hex(d):
+        for c in d:
+            if c not in set('0123456789abcdefABCDEF'):
+                return False
+    
+
 
 
 
