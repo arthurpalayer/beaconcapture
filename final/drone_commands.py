@@ -5,7 +5,6 @@ import time
 import threading as thread
 import network
 
-HOVER = 1250
 
 def low_motor(board, speed):
     buf = []
@@ -59,10 +58,8 @@ def landing(board):
 def auto(board, accel):
     #elevator x axis
     #aileron y axis
-    x_accel = 0
-    y_accel = 0
-    #x_accel = accel[0]
-    #y-accel = accel[1]
+    x_accel = accel[0]
+    y-accel = accel[1]
     aileron = int(x_accel * 100) + 1500
     elevator = int(y_accel * 100) + 1500
 
@@ -133,19 +130,19 @@ def control():
                 elevator = converted_data[5] /( 1023 * 4)        #right y axis
                 sendspeed(board, aileron, elevator, throttle, rudder)
 
-            elif(converted_data[0] == 0x2| converted_data[0] == 0x4):
-                print("Manual control off")
-                msg = "AUTOHOVER"
-                controlserver.s.sendto(msg.encode(), addr)
-                sendspeed(board, 0.5, 0.5, 0.25, 0.5)
-
-            elif(converted_data[0] == 0x4):
+            elif(converted_data[0] == 0x2):
                 print("Autonomous mode on")
                 msg = "AUTONOMOUS"
                 controlserver.s.sendto(msg.encode(), addr)
                 xyz = beaconserver.getdata()
-                #accel = get_accel(header.HOST, IMU_PORT)
-                #auto(board, accel)
+                #accel = get_accel(HOST, IMU_PORT)
+                auto(board, xyz)
+
+            elif(converted_data[0] == 0x4):
+                print("Manual control off")
+                msg = "AUTOHOVER"
+                controlserver.s.sendto(msg.encode(), addr)
+                sendspeed(board, 0.5, 0.5, 0.25, 0.5)
 
             else:
                 print("else")
