@@ -4,18 +4,16 @@ import cv2
 import select
 import pickle
 from time import sleep
-from drone import packetconvert
+from convert import packetconvert
+from picamera2 import Picamera2
 
 CONTROLLERBUFFSIZE = 16
 VIDEOBUFFSIZE = 32768
 BEACONBUFFSIZE = 64
 BUFFSIZE = 64
 PORT = 6969
+HOST = '127.0.0.1'
 VIDEOPORT = 6967
-CONTROLPORT = 6969
-BEACONPORT = 6968 
-HOST = '10.42.0.1'
-
 
 class server():
     
@@ -100,8 +98,9 @@ class client():
         return ret
     
     def sendcontrol(self, packet):
-        packet = packet.to_bytes(CONTROLLERBUFFSIZE)
+        packet = packet.to_bytes(CONTROLBUFFSIZE)
         self.s.sendto(packet, (self.ip, self.port))
+        return self.waitfordata(0.0005)
 
                      
 
@@ -121,15 +120,43 @@ class videoclient(client):
 class videoserver(server):
     def __init__(self, name="video", ip='10.42.0.1', port=VIDEOPORT):
         super().__init__(name, ip, port)
-        cam = Picamera2()
-        cam.start()
+        self.cam = Picamera2()
+        self.cam.start(show_preview=True)
 
     def sendvideo(self, addr):
         while 1:
-            im = cam.capture_array()
+            im = self.cam.capture_array()
+            im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
             ret, buffer = cv2.imencode(".jpg", im, [cv2.IMWRITE_JPEG_QUALITY, 30])
             x = buffer.tobytes()
             self.s.sendto(x, addr)
+
+class beaconserver(server):
+    def __init__(self, name="beacon", ip="10.42.0.1", port=BEACONPORT):
+        super().__init__(name, ip, port)
+
+    def getdata(self):
+        data, addr = self.s.recvfrom(BEACONBUFFSIZE)
+        packet = bytearray(data).decode('utf-8', errors='strict')
+        conversion = 160563.2
+        x = twos_complement(packet[4:8], 16) / conversion
+        y = twos_complement(packet[8:12], 16) / conversion
+        z = twos_complement(packet[12:16], 16) / conversion
+        return [x,y,z]
+        
+
+    def twos_complement(hexstr, bits):
+        value = int(hexstr, 16)
+        if value & (1 << (bits - 1)):
+            value -= 1 << bits
+        return value
+
+    def is_hex(d):
+        for c in d:
+            if c not in set('0123456789abcdefABCDEF'):
+                return False
+    
+
 
 
 
