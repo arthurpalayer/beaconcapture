@@ -20,7 +20,7 @@ Y2 = 8
 
 def recvcontrol():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
-    s.bind((HOST, CTRLPORT))
+    s.bind((header.HOST, CTRLPORT))
 
     board = MultiWii("dev/ttyACM0")
     time.sleep(1.0)

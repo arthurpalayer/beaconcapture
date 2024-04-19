@@ -6,14 +6,8 @@ import pickle
 from time import sleep
 from convert import packetconvert
 from picamera2 import Picamera2
+import header
 
-CONTROLLERBUFFSIZE = 16
-VIDEOBUFFSIZE = 32768
-BEACONBUFFSIZE = 64
-BUFFSIZE = 64
-PORT = 6969
-HOST = '127.0.0.1'
-VIDEOPORT = 6967
 
 class server():
     
@@ -66,7 +60,7 @@ class server():
 
 
 class client():
-    def __init__ (self, name = "client", ip = HOST, port = 6969):
+    def __init__ (self, name = "client", ip = header.HOST, port = 6969):
         self.name = name
         self.ip = ip
         self.port = port
@@ -98,7 +92,7 @@ class client():
         return ret
     
     def sendcontrol(self, packet):
-        packet = packet.to_bytes(CONTROLBUFFSIZE)
+        packet = packet.to_bytes(header.CONTROLBUFFSIZE)
         self.s.sendto(packet, (self.ip, self.port))
         return self.waitfordata(0.0005)
 
@@ -106,11 +100,11 @@ class client():
 
 
 class videoclient(client):
-    def __init__(self, name="video", ip='10.42.0.1', port=VIDEOPORT):
+    def __init__(self, name="video", ip='10.42.0.1', port=header.VIDEOPORT):
         super().__init__(name, ip, port) 
 
     def playvideo():
-        data, addr = s.recvfrom(VIDEOBUFFSIZE)
+        data, addr = s.recvfrom(header.VIDEOBUFFSIZE)
         data = np.frombuffer(data, np.uint8)
         data = cv2.imdecode(data, cv2.IMREAD_COLOR)
         cv2.imshow("LIVEFEED", data)
@@ -118,7 +112,7 @@ class videoclient(client):
 
 
 class videoserver(server):
-    def __init__(self, name="video", ip='10.42.0.1', port=VIDEOPORT):
+    def __init__(self, name="video", ip='10.42.0.1', port=header.VIDEOPORT):
         super().__init__(name, ip, port)
         self.cam = Picamera2()
         self.cam.start(show_preview=True)
@@ -132,11 +126,11 @@ class videoserver(server):
             self.s.sendto(x, addr)
 
 class beaconserver(server):
-    def __init__(self, name="beacon", ip="10.42.0.1", port=BEACONPORT):
+    def __init__(self, name="beacon", ip="10.42.0.1", port=header.BEACONPORT):
         super().__init__(name, ip, port)
 
     def getdata(self):
-        data, addr = self.s.recvfrom(BEACONBUFFSIZE)
+        data, addr = self.s.recvfrom(header.BEACONBUFFSIZE)
         packet = bytearray(data).decode('utf-8', errors='strict')
         conversion = 160563.2
         x = twos_complement(packet[4:8], 16) / conversion
