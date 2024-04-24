@@ -34,7 +34,7 @@ def sendspeed(board, ail, elv, thr, rud):
     push16(buf, elevator)
     push16(buf, thrust)
     push16(buf, rudder)
-    
+
     push16(buf, 1500)
     push16(buf, 1000)
     push16(buf, 1000)
@@ -54,23 +54,23 @@ def landing(board):
         push16(buf, 1000)
         board.sendCMD(MultiWii.SET_RAW_RC, buf)
         time.sleep(0.025)
-        
+
 def auto(board, accel):
     #elevator x axis
     #aileron y axis
-    
+
     x_accel = accel[0]
     y_accel = accel[1]
-    aileron = int(x_accel * 5000) + 1500
-    elevator = int(y_accel * 5000) + 1500
-    if aileron < 1200:
-        aileron = 1200
-    if aileron > 1800:
-        aileron = 1800
-    if elevator < 1200:
-        elevator = 1200
-    if elevator > 1800:
-        elevator = 1800
+    aileron = int(x_accel * 100000) + 1500
+    elevator = int(y_accel * 100000) + 1500
+    if aileron < 1000:
+        aileron = 1000
+    if aileron > 2000:
+        aileron = 2000
+    if elevator < 1000:
+        elevator = 1000
+    if elevator > 2000:
+        elevator = 2000
     '''
     if(thresh_dist < uwb.distance):
         aileron = int(x_accel * 100) + 1500

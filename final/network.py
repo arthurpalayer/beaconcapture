@@ -119,11 +119,15 @@ class videoserver(server):
 
     def sendvideo(self, addr):
         while 1:
-            im = self.cam.capture_array()
-            im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
-            ret, buffer = cv2.imencode(".jpg", im, [cv2.IMWRITE_JPEG_QUALITY, 50])
-            x = buffer.tobytes()
-            self.s.sendto(x, addr)
+            try:
+                im = self.cam.capture_array()
+                im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+                im = cv2.rotate(im, cv2.ROTATE_180)
+                ret, buffer = cv2.imencode(".jpg", im, [cv2.IMWRITE_JPEG_QUALITY, 50])
+                x = buffer.tobytes()
+                self.s.sendto(x, addr)
+            except KeyboardInterrupt:
+                self.cam.stop()
 
 class beaconserver(server):
     def __init__(self, name="beacon", ip="10.42.0.1", port=header.BEACONPORT):
